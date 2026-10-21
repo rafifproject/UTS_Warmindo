@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" fill="none">
+  <circle cx="80" cy="80" r="70" fill="#F4FBF7"/>
+  <!-- Open Box Icon -->
+  <path d="M45 65L80 48L115 65L80 82L45 65Z" fill="#E6FCF5" stroke="#20C997" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M45 65V98L80 115V82L45 65Z" fill="#C3FAE8" stroke="#20C997" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M115 65V98L80 115V82L115 65Z" fill="#96F2D7" stroke="#20C997" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M80 82V115" stroke="#20C997" stroke-width="3" stroke-linecap="round"/>
+  <!-- Floating dashes -->
+  <circle cx="40" cy="50" r="3" fill="#63E6BE"/>
+  <circle cx="120" cy="50" r="2.5" fill="#63E6BE"/>
+  <circle cx="125" cy="85" r="3" fill="#63E6BE"/>
+</svg>

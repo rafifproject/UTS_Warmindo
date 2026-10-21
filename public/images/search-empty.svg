@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" fill="none">
+  <circle cx="80" cy="80" r="70" fill="#F4FBF7"/>
+  <!-- Magnifying glass with sad line or sparkle -->
+  <circle cx="72" cy="72" r="32" stroke="#20C997" stroke-width="4.5" fill="#FFFFFF"/>
+  <path d="M96 96L122 122" stroke="#20C997" stroke-width="5" stroke-linecap="round"/>
+  <!-- Inner query question mark or flat face -->
+  <circle cx="62" cy="68" r="3.5" fill="#20C997"/>
+  <circle cx="82" cy="68" r="3.5" fill="#20C997"/>
+  <path d="M66 84C69 80 75 80 78 84" stroke="#20C997" stroke-width="3" stroke-linecap="round"/>
+</svg>

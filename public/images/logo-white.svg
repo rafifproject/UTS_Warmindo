@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 64" fill="none">
+  <!-- Bowl Icon -->
+  <g transform="translate(4, 6)">
+    <!-- Bowl Body -->
+    <path d="M6 24C6 37.2548 16.7452 48 30 48C43.2548 48 54 37.2548 54 24H6Z" fill="#F06524"/>
+    <!-- Bowl Base -->
+    <path d="M18 48H42V51C42 52.1046 41.1046 53 40 53H20C18.8954 53 18 52.1046 18 51V48Z" fill="#FFA940"/>
+    <!-- Steaming Noodles -->
+    <path d="M14 20C16 12 22 14 24 8C25 6 23 4 21 4" stroke="#FFE066" stroke-width="3" stroke-linecap="round"/>
+    <path d="M26 21C28 14 34 16 36 10C37 8 35 6 33 6" stroke="#FFE066" stroke-width="3" stroke-linecap="round"/>
+    <path d="M38 22C40 15 44 18 46 12C47 10 45 8 43 8" stroke="#FFE066" stroke-width="3" stroke-linecap="round"/>
+    <!-- Chopsticks -->
+    <path d="M46 6L10 2" stroke="#FFA940" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M48 9L12 5" stroke="#FFA940" stroke-width="2.5" stroke-linecap="round"/>
+  </g>
+  <!-- Brand Typography -->
+  <text x="68" y="32" font-family="'Plus Jakarta Sans', 'Inter', system-ui, sans-serif" font-size="24" font-weight="800" fill="#FFFFFF" letter-spacing="1.2">WARMINDO</text>
+  <text x="69" y="48" font-family="'Plus Jakarta Sans', 'Inter', system-ui, sans-serif" font-size="11.5" font-weight="500" fill="#E2E8F0" letter-spacing="0.2">Makan Enak, Harga Bersahabat</text>
+</svg>

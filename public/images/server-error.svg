@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" fill="none">
+  <circle cx="80" cy="80" r="70" fill="#F1F3F5"/>
+  <!-- Sad Cloud -->
+  <path d="M50 85C44.4772 85 40 80.5228 40 75C40 69.4772 44.4772 65 50 65C50.5 65 51 65.05 51.5 65.12C53.2 56.5 60.8 50 70 50C77.4 50 83.8 54.2 86.8 60.5C88.4 59.5 90.4 59 92.5 59C98.85 59 104 64.15 104 70.5C104 71.3 103.9 72.1 103.7 72.8C107.3 74.4 110 78 110 82.5C110 88.3 105.3 93 99.5 93H50C44.4772 93 40 88.5228 40 83" fill="#CED4DA"/>
+  <!-- Sad Eyes & Mouth -->
+  <circle cx="64" cy="72" r="2.5" fill="#495057"/>
+  <circle cx="84" cy="72" r="2.5" fill="#495057"/>
+  <path d="M68 83C71 79 77 79 80 83" stroke="#495057" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Red error mark -->
+  <circle cx="110" cy="55" r="9" fill="#FF6B6B"/>
+  <path d="M107 52L113 58M113 52L107 58" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
+</svg>

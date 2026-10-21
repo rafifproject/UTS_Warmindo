@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" fill="none">
+  <circle cx="80" cy="80" r="70" fill="#FFF4E6"/>
+  <!-- Lock Illustration -->
+  <rect x="52" y="65" width="56" height="48" rx="10" fill="#F06524"/>
+  <path d="M62 65V52C62 42.0589 70.0589 34 80 34C89.9411 34 98 42.0589 98 52V65" stroke="#F06524" stroke-width="7" stroke-linecap="round"/>
+  <!-- Keyhole -->
+  <circle cx="80" cy="85" r="5" fill="#FFFFFF"/>
+  <path d="M78 88H82L83 97H77L78 88Z" fill="#FFFFFF"/>
+  <!-- Leaves / decoration -->
+  <path d="M38 98C35 90 40 85 45 88C43 95 38 98 38 98Z" fill="#FFA940"/>
+  <path d="M122 98C125 90 120 85 115 88C117 95 122 98 122 98Z" fill="#FFA940"/>
+</svg>
