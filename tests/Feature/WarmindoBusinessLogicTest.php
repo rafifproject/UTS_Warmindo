@@ -290,4 +290,101 @@ class WarmindoBusinessLogicTest extends TestCase
         $response->assertSee('AI Business Assistant');
         $response->assertSee('Data Pendukung Analisis');
     }
+
+    /**
+     * Test 11 (Slide 27 Butir 5): Purchase sukses menambah stok dan mencatat mutasi masuk
+     */
+    public function test_purchase_increases_stock_and_logs_mutation()
+    {
+        $admin = User::where('role', 'admin')->first();
+        $supplier = \App\Models\Supplier::first();
+        $product = Product::first();
+        $initialStock = $product->stock;
+        $qtyPurchased = 10;
+
+        $response = $this->actingAs($admin)->post('/admin/purchases', [
+            'purchase_number' => 'PB-TEST-' . time(),
+            'supplier_id'     => $supplier->id,
+            'purchase_date'   => now()->toDateString(),
+            'items' => [
+                [
+                    'product_id' => $product->id,
+                    'quantity'   => $qtyPurchased,
+                    'unit_price' => 8000,
+                ]
+            ],
+            'notes' => 'Uji penambahan stok pembelian',
+        ]);
+
+        $response->assertRedirect('/admin/purchases');
+        $product->refresh();
+
+        $this->assertEquals($initialStock + $qtyPurchased, $product->stock);
+
+        $mutation = StockMutation::where('reference_type', 'purchase')
+            ->where('product_id', $product->id)
+            ->latest('id')
+            ->first();
+
+        $this->assertNotNull($mutation);
+        $this->assertEquals('in', $mutation->type);
+        $this->assertEquals($qtyPurchased, $mutation->quantity);
+    }
+
+    /**
+     * Test 12 (Slide 27 Butir 6): Sales dengan stok tidak cukup gagal dan rollback otomatis tanpa mengubah stok
+     */
+    public function test_sales_fails_and_rollbacks_when_stock_insufficient()
+    {
+        $staff = User::where('role', 'staff')->first();
+        $product = Product::where('stock', '>', 0)->first();
+        $initialStock = $product->stock;
+
+        // Buat pesanan dengan kuantitas melebihi stok yang ada
+        $excessQuantity = $initialStock + 50;
+
+        $sale = Sale::create([
+            'sale_number'    => 'PSN-OVERSOLD-' . time(),
+            'order_type'     => 'dine_in',
+            'table_number'   => '08',
+            'subtotal'       => $product->sell_price * $excessQuantity,
+            'service_fee'    => 0,
+            'total_amount'   => $product->sell_price * $excessQuantity,
+            'payment_status' => 'pending',
+            'order_status'   => 'waiting_payment',
+        ]);
+
+        SaleItem::create([
+            'sale_id'      => $sale->id,
+            'product_id'   => $product->id,
+            'product_name' => $product->name,
+            'price'        => $product->sell_price,
+            'quantity'     => $excessQuantity,
+            'subtotal'     => $product->sell_price * $excessQuantity,
+        ]);
+
+        // Coba bayar di kasir, sistem harus melempar exception dan rollback DB::transaction
+        try {
+            $this->actingAs($staff)->post("/kasir/pay/{$sale->sale_number}", [
+                'cash_received'  => ($product->sell_price * $excessQuantity) + 10000,
+                'payment_method' => 'cash',
+            ]);
+        } catch (\Exception $e) {
+            $this->assertStringContainsString('Stok tidak mencukupi', $e->getMessage());
+        }
+
+        // Verifikasi Rollback: Stok fisik produk TIDAK BERUBAH sama sekali
+        $product->refresh();
+        $sale->refresh();
+
+        $this->assertEquals($initialStock, $product->stock);
+        $this->assertEquals('pending', $sale->payment_status);
+
+        // Verifikasi tidak ada mutasi stok yang tersimpan
+        $mutation = StockMutation::where('reference_type', 'sale')
+            ->where('reference_id', $sale->id)
+            ->first();
+        $this->assertNull($mutation);
+    }
 }
+

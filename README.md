@@ -539,7 +539,7 @@ Seluruh kolom tabel database telah dilengkapi dengan atribut `COMMENT` native My
 
 ## 11. Business Rules & Integritas Transaksi
 
-Sistem mematuhi aturan bisnis ketat (Slide 8):
+Sistem mematuhi aturan bisnis ketat (Slide 8, Slide 16, Slide 17, dan Slide 27):
 1. **Keunikan SKU:** Diuji ganda di level validasi form (`unique:products,sku`) dan *unique index* tabel MySQL.
 2. **Validasi Kuantitas & Harga:** Kuantitas transaksi wajib integer `> 0`, harga satuan `>= 0`.
 3. **Pencegahan Overselling & Atomisitas:**
@@ -554,14 +554,46 @@ Sistem mematuhi aturan bisnis ketat (Slide 8):
    });
    ```
 4. **Perhitungan Server-Side:** Total harga dihitung langsung dari harga produk resmi di database dikalikan kuantitas (menolak manipulasi nilai dari browser).
-5. **Pemulihan Stok saat Batal:** Pembatalan penjualan oleh Admin mengembalikan stok produk ke gudang secara otomatis (`increment('stock')`).
+5. **Pemulihan Stok saat Batal:** Pembatalan penjualan oleh Owner mengembalikan stok produk ke gudang secara otomatis (`increment('stock')`).
 6. **Perlindungan Data Historis:** Produk menggunakan **Soft Deletes** sehingga menu yang pernah terjual tidak dihapus permanen dari basis data.
+
+### 11.1 Pemenuhan Rencana Kerja UTS (Slide 27: Butir 5 & 6)
+
+Berikut adalah bukti implementasi teknis dan skenario pengujian untuk dua butir utama dari **Rencana Kerja Mahasiswa (Slide 27)**:
+
+#### 🟢 Butir 5: Implementasikan purchase; uji perubahan stok
+- **Lokasi Kode:** `app/Http/Controllers/Admin/KontrollerPembelian.php` (metode `simpan()`).
+- **Mekanisme Kerja:**
+  1. Owner menginput transaksi pembelian bahan baku dengan memilih rekanan supplier dan daftar produk beserta kuantitas barang masuk.
+  2. Sistem membungkus operasi di dalam `DB::transaction()`.
+  3. Baris produk dikunci dengan `lockForUpdate()`, lalu stok fisik ditambah secara atomik:
+     ```php
+     $produk->increment('stock', $data['quantity']);
+     ```
+  4. Sistem mencatat riwayat ke buku besar `stock_mutations` dengan tipe `'in'`, menyimpan kuantitas, saldo sebelum (`before_stock`), dan saldo sesudah (`after_stock`).
+- **Bukti Uji Otomatis:** Skenario `test_purchase_increases_stock_and_logs_mutation()` memverifikasi bahwa setelah transaksi pembelian sukses, nilai stok produk di database bertambah persis sebesar kuantitas yang dibeli dan mutasi tipe `in` tersimpan lengkap (**Status: PASS**).
+
+#### 🔴 Butir 6: Implementasikan sales; uji stok tidak cukup dan rollback
+- **Lokasi Kode:** `app/Http/Controllers/KontrollerKasir.php` (metode `prosesBayar()`) dan `app/Http/Controllers/KontrollerKeranjang.php` (metode `checkout()`).
+- **Mekanisme Deteksi & Rollback:**
+  1. Saat transaksi penjualan diproses, sistem memeriksa ketersediaan stok fisik setiap item:
+     ```php
+     if ($produk->stock < $item->quantity) {
+         throw new \Exception('Stok tidak mencukupi untuk ' . $produk->name . '. Sisa stok: ' . $produk->stock);
+     }
+     ```
+  2. Karena seluruh eksekusi berada di dalam `DB::transaction()`, saat `Exception` dilemparkan:
+     - Seluruh perubahan dibatalkan seketika (*Database Rollback*).
+     - Stok produk **TIDAK berkurang sama sekali**.
+     - Status pembayaran **tetap `pending`** (tidak berubah menjadi `paid`).
+     - Tidak ada rekaman `stock_mutations` palsu atau baris data yang tersimpan setengah.
+- **Bukti Uji Otomatis:** Skenario `test_sales_fails_and_rollbacks_when_stock_insufficient()` mensimulasikan kasir memproses pesanan dengan kuantitas melebihi stok gudang (stok + 50). Sistem melempar exception, melakukan *rollback* total, dan memverifikasi bahwa stok fisik tidak berkurang sedikitpun (**Status: PASS**).
 
 ---
 
 ## 12. Test Scenario & Bukti Hasil Pengujian
 
-Pengujian dilakukan menggunakan Automated Feature Test Suite (`php artisan test`) yang mencakup seluruh skenario Slide 19:
+Pengujian dilakukan menggunakan Automated Feature Test Suite (`php artisan test`) yang mencakup seluruh skenario Slide 19 dan Slide 27:
 
 | No | Skenario Uji | Tindakan Pengujian | Hasil yang Diharapkan | Status |
 | :-: | :--- | :--- | :--- | :---: |
@@ -575,6 +607,8 @@ Pengujian dilakukan menggunakan Automated Feature Test Suite (`php artisan test`
 | 8 | **Sale Cancel** | Owner membatalkan transaksi penjualan lunas | Stok produk bertambah kembali (*restored*) | **PASS** |
 | 9 | **Owner Reports** | Akses 7 modul laporan bisnis | Grafik & data mentah termuat sempurna | **PASS** |
 | 10 | **AI Assistant** | Generate analitik rekomendasi bisnis | Ringkasan performa dan stok tampil sukses | **PASS** |
+| 11 | **Purchase Stock-In (Slide 27 #5)** | Input nota pembelian stok masuk dari supplier | Stok produk bertambah & mutasi `in` tercatat | **PASS** |
+| 12 | **Sales Rollback (Slide 27 #6)** | Transaksi pesanan dengan kuantitas melebihi stok | Transaksi ditolak, DB rollback, stok utuh | **PASS** |
 
 ### Log Hasil Eksekusi Test:
 ```text
@@ -595,9 +629,11 @@ Pengujian dilakukan menggunakan Automated Feature Test Suite (`php artisan test`
   ✓ admin cancel paid sale restores stock
   ✓ admin can access reports
   ✓ ai business assistant generates analysis
+  ✓ purchase increases stock and logs mutation
+  ✓ sales fails and rollbacks when stock insufficient
 
-  Tests:    12 passed (37 assertions)
-  Duration: 1.15s
+  Tests:    14 passed (46 assertions)
+  Duration: 1.42s
 ```
 
 ---
