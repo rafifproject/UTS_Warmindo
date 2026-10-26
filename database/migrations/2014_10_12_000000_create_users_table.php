@@ -12,17 +12,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('username')->unique()->nullable();
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->enum('role', ['admin', 'staff'])->default('staff');
-            $table->string('phone')->nullable();
-            $table->enum('status', ['active', 'inactive'])->default('active');
-            $table->string('avatar')->nullable();
-            $table->rememberToken();
+            $table->id()->comment('Nomor ID unik pengguna');
+            $table->string('name')->comment('Nama lengkap pengguna / staf / owner');
+            $table->string('username')->unique()->nullable()->comment('Username unik untuk login sistem');
+            $table->string('email')->unique()->comment('Alamat email unik pengguna');
+            $table->timestamp('email_verified_at')->nullable()->comment('Waktu verifikasi email');
+            $table->string('password')->comment('Kata sandi terenkripsi (bcrypt)');
+            $table->enum('role', ['admin', 'staff'])->default('staff')->comment('Peran hak akses: admin (Owner) atau staff (Kasir & Dapur)');
+            $table->string('phone')->nullable()->comment('Nomor telepon atau WhatsApp');
+            $table->enum('status', ['active', 'inactive'])->default('active')->comment('Status akun: active (aktif) atau inactive (nonaktif)');
+            $table->string('avatar')->nullable()->comment('File foto profil pengguna');
+            $table->rememberToken()->comment('Token untuk sesi login tetap aktif');
             $table->timestamps();
         });
     }

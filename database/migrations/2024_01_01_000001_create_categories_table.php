@@ -9,11 +9,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('categories', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('slug')->unique();
-            $table->text('description')->nullable();
-            $table->boolean('is_active')->default(true);
+            $table->id()->comment('Nomor ID unik kategori');
+            $table->string('name')->comment('Nama kategori menu (contoh: Mie, Minuman, Snack, Nasi)');
+            $table->string('slug')->unique()->comment('Slug URL unik kategori (contoh: mie, minuman)');
+            $table->text('description')->nullable()->comment('Deskripsi penjelasan kategori');
+            $table->boolean('is_active')->default(true)->comment('Status aktif kategori: 1 (aktif), 0 (nonaktif)');
             $table->timestamps();
         });
     }

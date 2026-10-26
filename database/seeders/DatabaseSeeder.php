@@ -30,6 +30,7 @@ class DatabaseSeeder extends Seeder
             'phone' => '0812-3456-7890',
             'status' => 'active',
         ]);
+        $admin = $owner;
 
         $kasir = User::create([
             'name' => 'Siti Aisyah',

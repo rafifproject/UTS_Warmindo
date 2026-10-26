@@ -228,8 +228,9 @@ erDiagram
     USERS {
         bigint id PK
         string name
-        string email
         string username
+        string email
+        string password
         string role
         string status
     }
@@ -237,6 +238,7 @@ erDiagram
         bigint id PK
         string name
         string slug
+        text description
         boolean is_active
     }
     PRODUCTS {
@@ -244,10 +246,12 @@ erDiagram
         bigint category_id FK
         string sku
         string name
-        decimal buy_price
-        decimal sell_price
+        text description
+        decimal purchase_price
+        decimal selling_price
         int stock
-        int min_stock
+        int minimum_stock
+        string image
         boolean is_available
     }
     SUPPLIERS {
@@ -255,16 +259,19 @@ erDiagram
         string name
         string phone
         string email
+        text address
+        text description
         boolean is_active
     }
     PURCHASES {
         bigint id PK
         bigint supplier_id FK
         bigint user_id FK
-        string purchase_number
+        string invoice_number
+        date purchase_date
         decimal total_amount
         string status
-        date purchase_date
+        text notes
     }
     PURCHASE_ITEMS {
         bigint id PK
@@ -277,34 +284,41 @@ erDiagram
     SALES {
         bigint id PK
         bigint user_id FK
-        string sale_number
+        string invoice_number
+        string customer_name
         string order_type
         string table_number
         decimal subtotal
+        decimal tax
+        decimal discount
         decimal total_amount
+        decimal paid_amount
+        decimal change_amount
+        string payment_method
         string payment_status
         string order_status
-        string payment_method
+        text notes
     }
     SALE_ITEMS {
         bigint id PK
         bigint sale_id FK
         bigint product_id FK
-        string product_name
-        decimal price
         int quantity
+        decimal unit_price
         decimal subtotal
+        text notes
     }
     STOCK_MUTATIONS {
         bigint id PK
         bigint product_id FK
         bigint user_id FK
         string type
-        string reference_type
-        string reference_number
         int quantity
-        int before_stock
-        int after_stock
+        int stock_before
+        int stock_after
+        string reference_type
+        bigint reference_id
+        text notes
     }
     ORDER_STATUS_HISTORIES {
         bigint id PK
@@ -312,25 +326,176 @@ erDiagram
         bigint user_id FK
         string from_status
         string to_status
+        text notes
     }
 ```
 
-### 10.2 Kamus Data & Relasi Tabel Utama
+### 10.2 Kamus Data Relasi Antar Tabel Utama
 
 | Nama Tabel | Primary Key | Foreign Key | Keterangan Relasi |
 | :--- | :--- | :--- | :--- |
-| **`users`** | `id` | - | Menyimpan akun Admin dan Staff. |
-| **`categories`** | `id` | - | Satu kategori memiliki banyak produk (`hasMany Products`). |
-| **`products`** | `id` | `category_id` &rarr; `categories(id)` | Produk terikat ke 1 kategori (`belongsTo Category`). Memiliki relasi ke `purchase_items` dan `sale_items`. Menggunakan `SoftDeletes`. |
-| **`suppliers`** | `id` | - | Satu supplier menyuplai banyak pembelian (`hasMany Purchases`). |
-| **`purchases`** | `id` | `supplier_id` &rarr; `suppliers(id)`<br>`user_id` &rarr; `users(id)` | Header nota pembelian dari supplier. Memiliki relasi ke `purchase_items`. |
-| **`purchase_items`**| `id` | `purchase_id` &rarr; `purchases(id)`<br>`product_id` &rarr; `products(id)` | Detail kuantitas, harga beli satuan, dan subtotal per item barang masuk. |
+| **`users`** | `id` | - | Menyimpan akun Owner dan Staf (Kasir/Dapur). |
+| **`categories`** | `id` | - | Satu kategori memiliki banyak produk menu (`hasMany Products`). |
+| **`products`** | `id` | `category_id` &rarr; `categories(id)` | Menu terikat ke 1 kategori (`belongsTo Category`). Memiliki relasi ke `purchase_items` dan `sale_items`. Menggunakan `SoftDeletes`. |
+| **`suppliers`** | `id` | - | Satu supplier menyuplai banyak transaksi pembelian stok (`hasMany Purchases`). |
+| **`purchases`** | `id` | `supplier_id` &rarr; `suppliers(id)`<br>`user_id` &rarr; `users(id)` | Header nota belanja pasokan stok dari pemasok/supplier. Memiliki relasi ke `purchase_items`. |
+| **`purchase_items`**| `id` | `purchase_id` &rarr; `purchases(id)`<br>`product_id` &rarr; `products(id)` | Detail kuantitas, harga beli modal satuan, dan subtotal per item barang masuk. |
 | **`sales`** | `id` | `user_id` &rarr; `users(id)` | Header struk transaksi penjualan pelanggan. Memiliki relasi ke `sale_items` dan `order_status_histories`. |
-| **`sale_items`** | `id` | `sale_id` &rarr; `sales(id)`<br>`product_id` &rarr; `products(id)` | Detail menu yang dipesan, harga saat transaksi, kuantitas, dan subtotal. |
-| **`stock_mutations`**| `id` | `product_id` &rarr; `products(id)`<br>`user_id` &rarr; `users(id)` | Audit trail riwayat pergerakan stok (tipe: `in`, `out`, `adjustment`, stok sebelum dan sesudah). |
+| **`sale_items`** | `id` | `sale_id` &rarr; `sales(id)`<br>`product_id` &rarr; `products(id)` | Detail menu yang dipesan, catatan racikan porsi, harga jual saat transaksi, kuantitas, dan subtotal. |
+| **`stock_mutations`**| `id` | `product_id` &rarr; `products(id)`<br>`user_id` &rarr; `users(id)` | Audit trail riwayat pergerakan stok (tipe: `in`, `out`, `adjustment`, saldo sebelum dan sesudah). |
 | **`order_status_histories`**| `id` | `sale_id` &rarr; `sales(id)`<br>`user_id` &rarr; `users(id)` | Riwayat waktu dan staf yang mengubah tahapan masakan di dapur KDS. |
 
-> **Catatan Akademis (Slide 10):** Foreign key selalu diletakkan pada tabel *child/detail* (`purchase_items`, `sale_items`) karena relasi bersifat *One-to-Many* (1 struk memiliki banyak rincian menu).
+> **Catatan Akademis (Slide 10):** Foreign key selalu diletakkan pada tabel *child/detail* (`purchase_items`, `sale_items`) karena relasi bersifat *One-to-Many* (1 struk memiliki banyak rincian item pesanan).
+
+---
+
+### 10.3 Kamus Data Lengkap Bahasa Indonesia (Penjelasan Seluruh Kolom & Isinya)
+
+Seluruh kolom tabel database telah dilengkapi dengan atribut `COMMENT` native MySQL berbahasa Indonesia sehingga saat dibuka melalui **phpMyAdmin**, **DBeaver**, **HeidiSQL**, maupun **Navicat**, arti dan fungsi setiap kolom langsung terbaca jelas dalam Bahasa Indonesia.
+
+#### 1. Tabel `users` (Pengguna Sistem)
+| Nama Kolom Fisik | Tipe Data MySQL | Nilai Bawaan / Atribut | Arti & Keterangan Kolom (Bahasa Indonesia) | Contoh Isi Kolom |
+| :--- | :--- | :--- | :--- | :--- |
+| `id` | `bigint unsigned` | PK, Auto Increment | Nomor ID unik pengguna sistem | `1`, `2` |
+| `name` | `varchar(255)` | Not Null | Nama lengkap pemilik atau karyawan | `Owner Warmindo`, `Staf Kasir` |
+| `username` | `varchar(255)` | Not Null, Unique | Username login akun | `owner`, `kasir` |
+| `email` | `varchar(255)` | Not Null, Unique | Alamat surat elektronik (email) unik | `owner@warmindo.local` |
+| `email_verified_at`| `timestamp` | Nullable | Waktu verifikasi alamat email | `2026-10-26 12:00:00` |
+| `password` | `varchar(255)` | Not Null | Kata sandi login terenkripsi hash Bcrypt | `$2y$10$...` |
+| `role` | `enum('owner','staff')` | Default: `'staff'` | Peran hak akses: `owner` (pemilik), `staff` (karyawan kasir & dapur) | `'owner'`, `'staff'` |
+| `status` | `enum('active','inactive')` | Default: `'active'` | Status keaktifan akun: `active` (aktif), `inactive` (nonaktif) | `'active'` |
+| `remember_token` | `varchar(100)` | Nullable | Token pengingat sesi login persisten | `token_str` |
+| `created_at` | `timestamp` | Nullable | Waktu pencatatan akun dibuat | `2026-10-26 10:00:00` |
+| `updated_at` | `timestamp` | Nullable | Waktu terakhir akun diperbarui | `2026-10-26 10:00:00` |
+
+#### 2. Tabel `categories` (Kategori Menu)
+| Nama Kolom Fisik | Tipe Data MySQL | Nilai Bawaan / Atribut | Arti & Keterangan Kolom (Bahasa Indonesia) | Contoh Isi Kolom |
+| :--- | :--- | :--- | :--- | :--- |
+| `id` | `bigint unsigned` | PK, Auto Increment | Nomor ID unik kategori menu | `1`, `2` |
+| `name` | `varchar(255)` | Not Null | Nama kategori menu | `Mie`, `Minuman`, `Snack`, `Nasi` |
+| `slug` | `varchar(255)` | Not Null, Unique | Teks URL ramah SEO (*Slug*) | `mie`, `minuman`, `snack` |
+| `description` | `text` | Nullable | Penjelasan keterangan kategori menu | `Aneka racikan mie khas Warmindo` |
+| `is_active` | `tinyint(1)` | Default: `1` | Status aktif kategori: `1` (aktif), `0` (nonaktif) | `1` |
+| `created_at` | `timestamp` | Nullable | Waktu kategori ditambahkan | `2026-10-26 10:00:00` |
+| `updated_at` | `timestamp` | Nullable | Waktu kategori diperbarui | `2026-10-26 10:00:00` |
+
+#### 3. Tabel `products` (Katalog Menu & Produk)
+| Nama Kolom Fisik | Tipe Data MySQL | Nilai Bawaan / Atribut | Arti & Keterangan Kolom (Bahasa Indonesia) | Contoh Isi Kolom |
+| :--- | :--- | :--- | :--- | :--- |
+| `id` | `bigint unsigned` | PK, Auto Increment | Nomor ID unik menu/produk | `1`, `2`, `3` |
+| `category_id` | `bigint unsigned` | FK &rarr; `categories(id)` | ID kategori tempat menu bernaung | `1` |
+| `sku` | `varchar(255)` | Not Null, Unique | Kode unik menu / barcode barang | `MIE-001`, `MIN-001` |
+| `name` | `varchar(255)` | Not Null | Nama sajian menu makanan atau minuman | `Indomie Goreng Dok-Dok Spesial` |
+| `description` | `text` | Nullable | Uraian racikan resep & bahan saus/topping | `Racikan Indomie kuah kental telur...` |
+| `purchase_price` | `decimal(12,2)` | Default: `0.00` | Biaya modal racikan / harga beli bahan (HPP) | `7000.00` |
+| `selling_price` | `decimal(12,2)` | Not Null | Harga jual menu per porsi ke pelanggan | `15000.00` |
+| `stock` | `int` | Default: `0` | Sisa kuantitas stok porsi yang siap disajikan | `50` |
+| `minimum_stock` | `int` | Default: `5` | Batas stok minimum untuk memicu peringatan restock | `10` |
+| `image` | `varchar(255)` | Nullable | Nama file foto menu pada direktori sistem | `indomie-goreng-dokdok.png` |
+| `is_available` | `tinyint(1)` | Default: `1` | Ketersediaan menu: `1` (bisa dipesan), `0` (habis) | `1` |
+| `created_at` | `timestamp` | Nullable | Waktu menu didaftarkan ke sistem | `2026-10-26 10:00:00` |
+| `updated_at` | `timestamp` | Nullable | Waktu menu terakhir diedit | `2026-10-26 10:00:00` |
+| `deleted_at` | `timestamp` | Nullable (*Soft Delete*) | Waktu menu dihapus lunak (*Soft Delete*) | `NULL` |
+
+#### 4. Tabel `suppliers` (Pemasok Bahan Baku)
+| Nama Kolom Fisik | Tipe Data MySQL | Nilai Bawaan / Atribut | Arti & Keterangan Kolom (Bahasa Indonesia) | Contoh Isi Kolom |
+| :--- | :--- | :--- | :--- | :--- |
+| `id` | `bigint unsigned` | PK, Auto Increment | Nomor ID unik rekanan supplier | `1` |
+| `name` | `varchar(255)` | Not Null | Nama badan usaha / nama supplier bahan baku | `Distributor Sembako Jaya` |
+| `phone` | `varchar(255)` | Nullable | Nomor telepon atau WhatsApp kontak pemasok | `08123456789` |
+| `email` | `varchar(255)` | Nullable | Alamat email resmi rekanan pemasok | `supplier@sembakojaya.com` |
+| `address` | `text` | Nullable | Alamat fisik gudang / toko pemasok | `Jl. Malioboro No. 12, Yogyakarta` |
+| `description` | `text` | Nullable | Rincian komoditas bahan yang dipasok | `Pemasok mie instan, telur, dan bumbu` |
+| `is_active` | `tinyint(1)` | Default: `1` | Status keaktifan rekanan: `1` (aktif), `0` (nonaktif) | `1` |
+| `created_at` | `timestamp` | Nullable | Waktu supplier didaftarkan | `2026-10-26 10:00:00` |
+| `updated_at` | `timestamp` | Nullable | Waktu data supplier diubah | `2026-10-26 10:00:00` |
+
+#### 5. Tabel `purchases` (Nota Pembelian Stok Masuk)
+| Nama Kolom Fisik | Tipe Data MySQL | Nilai Bawaan / Atribut | Arti & Keterangan Kolom (Bahasa Indonesia) | Contoh Isi Kolom |
+| :--- | :--- | :--- | :--- | :--- |
+| `id` | `bigint unsigned` | PK, Auto Increment | Nomor ID unik transaksi pembelian pasokan | `1` |
+| `supplier_id` | `bigint unsigned` | FK &rarr; `suppliers(id)` | ID rekanan supplier yang memasok bahan | `1` |
+| `user_id` | `bigint unsigned` | FK &rarr; `users(id)` | ID user owner yang menginput nota belanja | `1` |
+| `invoice_number` | `varchar(255)` | Not Null, Unique | Nomor nota / faktur pembelian dari supplier | `PO-20261026-0001` |
+| `purchase_date` | `date` | Not Null | Tanggal nota pembelian | `2026-10-26` |
+| `total_amount` | `decimal(14,2)` | Default: `0.00` | Total nominal belanja bahan masuk (Rp) | `350000.00` |
+| `notes` | `text` | Nullable | Catatan pengiriman atau keterangan barang | `Restock mie dok-dok 50 porsi` |
+| `status` | `enum('pending','received','cancelled')` | Default: `'received'` | Status nota: `received` (stok diterima), `pending`, `cancelled` | `'received'` |
+| `created_at` | `timestamp` | Nullable | Waktu nota pembelian disimpan | `2026-10-26 10:00:00` |
+| `updated_at` | `timestamp` | Nullable | Waktu status nota diubah | `2026-10-26 10:00:00` |
+
+#### 6. Tabel `purchase_items` (Rincian Item Pembelian)
+| Nama Kolom Fisik | Tipe Data MySQL | Nilai Bawaan / Atribut | Arti & Keterangan Kolom (Bahasa Indonesia) | Contoh Isi Kolom |
+| :--- | :--- | :--- | :--- | :--- |
+| `id` | `bigint unsigned` | PK, Auto Increment | Nomor ID unik rincian item pembelian | `1` |
+| `purchase_id` | `bigint unsigned` | FK &rarr; `purchases(id)` | ID nota induk transaksi pembelian | `1` |
+| `product_id` | `bigint unsigned` | FK &rarr; `products(id)` | ID produk menu/bahan yang dibeli | `1` |
+| `quantity` | `int` | Not Null | Jumlah kuantitas stok barang masuk | `50` |
+| `unit_price` | `decimal(12,2)` | Not Null | Harga beli modal satuan saat pembelian (Rp) | `7000.00` |
+| `subtotal` | `decimal(14,2)` | Not Null | Subtotal baris item (`quantity` &times; `unit_price`) | `350000.00` |
+| `created_at` | `timestamp` | Nullable | Waktu baris rincian dicatat | `2026-10-26 10:00:00` |
+| `updated_at` | `timestamp` | Nullable | Waktu baris rincian diubah | `2026-10-26 10:00:00` |
+
+#### 7. Tabel `sales` (Struk Transaksi Penjualan)
+| Nama Kolom Fisik | Tipe Data MySQL | Nilai Bawaan / Atribut | Arti & Keterangan Kolom (Bahasa Indonesia) | Contoh Isi Kolom |
+| :--- | :--- | :--- | :--- | :--- |
+| `id` | `bigint unsigned` | PK, Auto Increment | Nomor ID unik transaksi penjualan kasir | `1` |
+| `invoice_number` | `varchar(255)` | Not Null, Unique | Nomor struk nota transaksi pesanan | `TRX-20261026-0001` |
+| `user_id` | `bigint unsigned` | Nullable, FK &rarr; `users(id)`| ID staf kasir yang melayani pesanan | `2` |
+| `customer_name` | `varchar(255)` | Nullable | Nama pelanggan / pemesan | `Mas Budi Santoso` |
+| `order_type` | `enum('dine_in','take_away')`| Default: `'dine_in'` | Tipe layanan: `dine_in` (makan ditempat), `take_away` (bungkus) | `'dine_in'` |
+| `table_number` | `varchar(255)` | Nullable | Nomor meja (khusus makan ditempat) | `'Meja 03'` |
+| `subtotal` | `decimal(14,2)` | Default: `0.00` | Total harga pesanan sebelum potongan/pajak (Rp) | `30000.00` |
+| `tax` | `decimal(12,2)` | Default: `0.00` | Nominal pajak penjualan (jika ada) (Rp) | `0.00` |
+| `discount` | `decimal(12,2)` | Default: `0.00` | Nilai potongan diskon promo (Rp) | `0.00` |
+| `total_amount` | `decimal(14,2)` | Default: `0.00` | Total tagihan akhir yang wajib dibayar (Rp) | `30000.00` |
+| `paid_amount` | `decimal(14,2)` | Default: `0.00` | Nominal uang tunai yang dibayar pelanggan (Rp) | `50000.00` |
+| `change_amount` | `decimal(14,2)` | Default: `0.00` | Nominal uang kembalian pelanggan (Rp) | `20000.00` |
+| `payment_method` | `enum('cash','qris','transfer')`| Default: `'cash'` | Cara bayar: `cash` (tunai), `qris` (QRIS), `transfer` | `'cash'` |
+| `payment_status` | `enum('unpaid','paid')`| Default: `'unpaid'` | Status bayar: `unpaid` (menunggu bayar), `paid` (lunas) | `'paid'` |
+| `order_status` | `enum('pending','cooking','ready','completed','cancelled')` | Default: `'pending'` | Tahapan proses dapur KDS: `pending` &rarr; `cooking` &rarr; `ready` &rarr; `completed` | `'completed'` |
+| `notes` | `text` | Nullable | Catatan khusus pesanan pelanggan | `'Mie dok-dok pedas sedang, es teh manis'` |
+| `created_at` | `timestamp` | Nullable | Waktu pesanan pertama kali dibuat | `2026-10-26 12:30:00` |
+| `updated_at` | `timestamp` | Nullable | Waktu terakhir status pesanan diubah | `2026-10-26 12:45:00` |
+
+#### 8. Tabel `sale_items` (Rincian Item Menu Pesanan)
+| Nama Kolom Fisik | Tipe Data MySQL | Nilai Bawaan / Atribut | Arti & Keterangan Kolom (Bahasa Indonesia) | Contoh Isi Kolom |
+| :--- | :--- | :--- | :--- | :--- |
+| `id` | `bigint unsigned` | PK, Auto Increment | Nomor ID unik rincian item menu pesanan | `1` |
+| `sale_id` | `bigint unsigned` | FK &rarr; `sales(id)` | ID nota induk transaksi penjualan | `1` |
+| `product_id` | `bigint unsigned` | FK &rarr; `products(id)` | ID menu yang dipesan pelanggan | `1` |
+| `quantity` | `int` | Not Null | Jumlah porsi menu yang dipesan | `2` |
+| `unit_price` | `decimal(12,2)` | Not Null | Harga per porsi saat transaksi berlangsung (Rp) | `15000.00` |
+| `subtotal` | `decimal(14,2)` | Not Null | Subtotal baris menu (`quantity` &times; `unit_price`) | `30000.00` |
+| `notes` | `varchar(255)` | Nullable | Catatan racikan khusus per porsi | `'Level 3 pedas, telur setengah matang'` |
+| `created_at` | `timestamp` | Nullable | Waktu item pesanan disimpan | `2026-10-26 12:30:00` |
+| `updated_at` | `timestamp` | Nullable | Waktu item pesanan diubah | `2026-10-26 12:30:00` |
+
+#### 9. Tabel `stock_mutations` (Buku Besar Audit Mutasi Stok)
+| Nama Kolom Fisik | Tipe Data MySQL | Nilai Bawaan / Atribut | Arti & Keterangan Kolom (Bahasa Indonesia) | Contoh Isi Kolom |
+| :--- | :--- | :--- | :--- | :--- |
+| `id` | `bigint unsigned` | PK, Auto Increment | Nomor ID unik mutasi stok | `1` |
+| `product_id` | `bigint unsigned` | FK &rarr; `products(id)` | ID produk menu yang mengalami pergerakan stok | `1` |
+| `user_id` | `bigint unsigned` | Nullable, FK &rarr; `users(id)`| ID pengguna yang memicu pergerakan stok | `2` |
+| `type` | `enum('in','out','adjustment')`| Not Null | Jenis arus stok: `in` (masuk), `out` (keluar), `adjustment` (opname) | `'out'` |
+| `quantity` | `int` | Not Null | Jumlah selisih pergerakan stok | `2` |
+| `stock_before` | `int` | Not Null | Saldo kuantitas stok sebelum transaksi terjadi | `50` |
+| `stock_after` | `int` | Not Null | Saldo kuantitas stok akhir setelah transaksi | `48` |
+| `reference_type` | `varchar(255)` | Nullable | Jenis dokumen rujukan: `'sale'`, `'purchase'`, `'adjustment'` | `'sale'` |
+| `reference_id` | `bigint unsigned` | Nullable | ID nomor transaksi pada tabel rujukan | `1` |
+| `notes` | `text` | Nullable | Penjelasan keterangan penyebab perubahan stok | `'Penjualan Nota #TRX-20261026-0001'` |
+| `created_at` | `timestamp` | Nullable | Waktu pencatatan mutasi stok terjadi | `2026-10-26 12:30:00` |
+
+#### 10. Tabel `order_status_histories` (Log Tahapan Dapur KDS)
+| Nama Kolom Fisik | Tipe Data MySQL | Nilai Bawaan / Atribut | Arti & Keterangan Kolom (Bahasa Indonesia) | Contoh Isi Kolom |
+| :--- | :--- | :--- | :--- | :--- |
+| `id` | `bigint unsigned` | PK, Auto Increment | Nomor ID unik catatan riwayat tahapan dapur | `1` |
+| `sale_id` | `bigint unsigned` | FK &rarr; `sales(id)` | ID transaksi pesanan yang dipantau di dapur | `1` |
+| `user_id` | `bigint unsigned` | Nullable, FK &rarr; `users(id)`| ID koki / kasir yang mengubah tahapan | `2` |
+| `from_status` | `varchar(255)` | Nullable | Tahapan pesanan sebelum diubah | `'pending'` |
+| `to_status` | `varchar(255)` | Not Null | Tahapan pesanan yang baru diset | `'cooking'` |
+| `notes` | `text` | Nullable | Catatan proses pembuatan makanan | `'Pesanan sedang diracik dan dimasak di dapur'` |
+| `created_at` | `timestamp` | Nullable | Waktu perubahan tahapan status dapur | `2026-10-26 12:32:00` |
 
 ---
 
