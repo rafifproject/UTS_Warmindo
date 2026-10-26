@@ -33,7 +33,7 @@
       <label class="form-label" for="cash_received" style="font-size: 14.5px;">
         Uang Diterima <span class="required">*</span>
       </label>
-      <input type="number" name="cash_received" id="cash_received" class="form-control" placeholder="Masukkan nominal uang tunai..." value="{{ old('cash_received', 50000) }}" style="font-size: 18px; font-weight: 700; padding: 12px 16px;" required autofocus>
+      <input type="number" name="cash_received" id="cash_received" class="form-control" placeholder="Masukkan nominal uang tunai..." value="{{ old('cash_received', '') }}" style="font-size: 18px; font-weight: 700; padding: 12px 16px;" required autofocus>
       
       <!-- Quick Cash Buttons (Screen 46: 50.000, 100.000, 200.000, pas) -->
       <div class="cash-shortcuts">
@@ -45,10 +45,10 @@
     </div>
 
     <!-- Kembalian Display (Screen 46) -->
-    <div style="background-color: #F4FBF7; border: 1.5px solid #C3FAE8; border-radius: var(--radius-md); padding: 18px 24px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: baseline;">
+    <div style="background-color: #F8F9FA; border: 1.5px solid var(--border-light); border-radius: var(--radius-md); padding: 18px 24px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: baseline; transition: all 0.2s ease;">
       <span style="font-size: 15px; font-weight: 700; color: var(--text-dark);">Kembalian:</span>
-      <span id="cash_change_display" style="font-size: 24px; font-weight: 800; color: #0CA678;">
-        Rp 10.000
+      <span id="cash_change_display" style="font-size: 24px; font-weight: 800; color: #ADB5BD;">
+        Rp 0
       </span>
     </div>
 

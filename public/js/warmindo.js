@@ -41,23 +41,44 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function calculateKembalian() {
     if (!cashInput || !totalBillElem || !changeDisplay) return;
+    const rawVal = cashInput.value !== undefined && cashInput.value !== null ? cashInput.value.toString().trim() : '';
+    const container = changeDisplay.parentElement;
+
+    if (rawVal === '') {
+      changeDisplay.textContent = 'Rp 0';
+      changeDisplay.style.color = '#ADB5BD';
+      if (container) {
+        container.style.backgroundColor = '#F8F9FA';
+        container.style.borderColor = 'var(--border-light)';
+      }
+      return;
+    }
+
     const total = parseFloat(totalBillElem.getAttribute('data-total') || 0);
-    const received = parseFloat(cashInput.value || 0);
+    const received = parseFloat(rawVal);
     const change = received - total;
 
     if (change >= 0) {
       changeDisplay.textContent = 'Rp ' + change.toLocaleString('id-ID');
-      changeDisplay.classList.remove('text-danger');
-      changeDisplay.classList.add('text-success');
+      changeDisplay.style.color = '#0CA678';
+      if (container) {
+        container.style.backgroundColor = '#F4FBF7';
+        container.style.borderColor = '#C3FAE8';
+      }
     } else {
       changeDisplay.textContent = 'Rp 0 (Kurang Rp ' + Math.abs(change).toLocaleString('id-ID') + ')';
-      changeDisplay.classList.remove('text-success');
-      changeDisplay.classList.add('text-danger');
+      changeDisplay.style.color = '#FA5252';
+      if (container) {
+        container.style.backgroundColor = '#FFF5F5';
+        container.style.borderColor = '#FFC9C9';
+      }
     }
   }
 
   if (cashInput) {
     cashInput.addEventListener('input', calculateKembalian);
+    // Initialize state on page load
+    calculateKembalian();
   }
 
   if (shortcutButtons.length > 0) {
