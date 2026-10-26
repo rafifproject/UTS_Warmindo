@@ -629,6 +629,7 @@ Pengujian dilakukan menggunakan Automated Feature Test Suite (`php artisan test`
 | 11 | **Purchase Stock-In (Slide 27 #5)** | Input nota pembelian stok masuk dari supplier | Stok produk bertambah & mutasi `in` tercatat | **PASS** |
 | 12 | **Sales Rollback (Slide 27 #6)** | Transaksi pesanan dengan kuantitas melebihi stok | Transaksi ditolak, DB rollback, stok utuh | **PASS** |
 | 13 | **Cashier QRIS Payment** | Kasir konfirmasi pembayaran pesanan via QRIS | Status paid, method qris, stok berkurang | **PASS** |
+| 14 | **Seamless Menu Ordering** | Tambah item ke keranjang tanpa redirect paksa ke cart | Tetap di halaman menu, item tersimpan, flash alert & floating bar tampil | **PASS** |
 
 ### Log Hasil Eksekusi Test:
 ```text
@@ -652,9 +653,10 @@ Pengujian dilakukan menggunakan Automated Feature Test Suite (`php artisan test`
   ✓ purchase increases stock and logs mutation
   ✓ sales fails and rollbacks when stock insufficient
   ✓ cashier qris payment confirmation succeeds
+  ✓ adding item to cart stays on menu page instead of redirecting to cart
 
-  Tests:    15 passed (54 assertions)
-  Duration: 1.11s
+  Tests:    16 passed (60 assertions)
+  Duration: 1.03s
 ```
 
 ---

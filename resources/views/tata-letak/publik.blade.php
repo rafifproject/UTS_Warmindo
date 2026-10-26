@@ -53,16 +53,29 @@
   <!-- Flash Alerts -->
   <div class="container" style="margin-top: 20px;">
     @if(session('success'))
-      <div style="background-color: #E6FCF5; border-left: 4px solid #12B886; color: #0CA678; padding: 12px 18px; border-radius: var(--radius-md); font-weight: 600; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
-        <span>{{ session('success') }}</span>
-        <button type="button" onclick="this.parentElement.remove()" style="background: none; border: none; font-size: 18px; cursor: pointer; color: inherit;">&times;</button>
+      <div style="background-color: #E6FCF5; border-left: 4px solid #12B886; color: #0CA678; padding: 14px 20px; border-radius: var(--radius-md); font-weight: 600; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 14px; box-shadow: 0 4px 12px rgba(18, 184, 134, 0.12);">
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <span style="font-size: 18px;">✅</span>
+          <span>{{ session('success') }}</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px; margin-left: auto;">
+          @if(!request()->routeIs('cart.*'))
+            <a href="{{ route('cart.index') }}" class="btn btn-sm" style="background-color: #12B886; color: #FFFFFF; font-weight: 700; padding: 6px 14px; border-radius: 6px; text-decoration: none; white-space: nowrap;">
+              Lihat Keranjang &rarr;
+            </a>
+          @endif
+          <button type="button" onclick="this.closest('div[style*=\'background-color\']').remove()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: inherit; line-height: 1;">&times;</button>
+        </div>
       </div>
     @endif
 
     @if(session('error'))
-      <div style="background-color: #FFE3E3; border-left: 4px solid #FA5252; color: #E03131; padding: 12px 18px; border-radius: var(--radius-md); font-weight: 600; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
-        <span>{{ session('error') }}</span>
-        <button type="button" onclick="this.parentElement.remove()" style="background: none; border: none; font-size: 18px; cursor: pointer; color: inherit;">&times;</button>
+      <div style="background-color: #FFE3E3; border-left: 4px solid #FA5252; color: #E03131; padding: 14px 20px; border-radius: var(--radius-md); font-weight: 600; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 14px; box-shadow: 0 4px 12px rgba(224, 49, 49, 0.12);">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 18px;">⚠️</span>
+          <span>{{ session('error') }}</span>
+        </div>
+        <button type="button" onclick="this.closest('div[style*=\'background-color\']').remove()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: inherit; line-height: 1;">&times;</button>
       </div>
     @endif
   </div>
@@ -85,6 +98,34 @@
       </div>
     </div>
   </footer>
+
+  <!-- Floating Sticky Cart Bar for Easy Multi-Item Ordering -->
+  @php
+    $floatingCart = session('cart', []);
+    $floatingCount = array_sum(array_column($floatingCart, 'quantity'));
+    $floatingTotal = 0;
+    foreach ($floatingCart as $fcItem) {
+        $floatingTotal += $fcItem['price'] * $fcItem['quantity'];
+    }
+  @endphp
+
+  @if($floatingCount > 0 && !request()->routeIs('cart.*'))
+    <div id="floatingCartBar" style="position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 1000; width: calc(100% - 32px); max-width: 520px; background: #1A1A1A; color: #FFFFFF; padding: 12px 20px; border-radius: 999px; box-shadow: 0 12px 32px rgba(0,0,0,0.35); display: flex; justify-content: space-between; align-items: center; gap: 14px; border: 1.5px solid rgba(255,255,255,0.15); backdrop-filter: blur(8px);">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="background-color: var(--primary); color: #FFFFFF; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; box-shadow: 0 2px 6px rgba(224,49,49,0.4);">
+          {{ $floatingCount }}
+        </div>
+        <div>
+          <div style="font-size: 11px; color: #ADB5BD; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Pesanan Anda</div>
+          <div style="font-size: 15px; font-weight: 800; color: #FFFFFF;">Rp {{ number_format($floatingTotal, 0, ',', '.') }}</div>
+        </div>
+      </div>
+      <a href="{{ route('cart.index') }}" class="btn btn-primary btn-sm" style="border-radius: 999px; padding: 8px 18px; font-weight: 700; text-decoration: none; box-shadow: 0 4px 12px rgba(224,49,49,0.4); display: flex; align-items: center; gap: 6px;">
+        <span>Buka Keranjang</span>
+        <span>&rarr;</span>
+      </a>
+    </div>
+  @endif
 
   <script src="{{ asset('js/warmindo.js') }}"></script>
   @stack('scripts')

@@ -71,7 +71,7 @@ class KontrollerKeranjang extends Controller
             ]);
         }
 
-        return redirect()->route('cart.index')->with('success', 'Menu berhasil ditambahkan ke keranjang!');
+        return back()->with('success', 'Menu "' . $produk->name . '" berhasil ditambahkan ke pesanan!');
     }
 
     public function perbaruiMenu(Request $request, $id)

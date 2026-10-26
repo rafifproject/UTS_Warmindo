@@ -427,5 +427,25 @@ class WarmindoBusinessLogicTest extends TestCase
         $this->assertEquals($sale->total_amount, $sale->cash_received);
         $this->assertEquals(0, $sale->cash_change);
     }
+
+    /**
+     * Test 14: Menambahkan menu ke pesanan tidak langsung redirect ke cart (tetap di menu page)
+     */
+    public function test_adding_item_to_cart_stays_on_menu_page_instead_of_redirecting_to_cart()
+    {
+        $product = Product::where('stock', '>=', 5)->first();
+
+        $response = $this->from('/menu')->post("/cart/add/{$product->id}", [
+            'quantity' => 1,
+        ]);
+
+        $response->assertRedirect('/menu');
+        $response->assertSessionHas('cart');
+        $response->assertSessionHas('success');
+
+        $cart = session('cart');
+        $this->assertArrayHasKey($product->id, $cart);
+        $this->assertEquals(1, $cart[$product->id]['quantity']);
+    }
 }
 
