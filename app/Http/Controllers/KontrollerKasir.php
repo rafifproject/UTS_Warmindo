@@ -136,63 +136,67 @@ class KontrollerKasir extends Controller
             ? ($uangDiterima - $penjualan->total_amount)
             : 0;
 
-        DB::transaction(function () use ($penjualan, $request, $uangDiterima, $kembalian) {
-            $penjualanTerkunci = Penjualan::lockForUpdate()->find($penjualan->id);
+        try {
+            DB::transaction(function () use ($penjualan, $request, $uangDiterima, $kembalian) {
+                $penjualanTerkunci = Penjualan::lockForUpdate()->find($penjualan->id);
 
-            if ($penjualanTerkunci->payment_status === 'paid') {
-                throw new \Exception('Pesanan sudah dibayar oleh kasir lain.');
-            }
-
-            foreach ($penjualanTerkunci->itemPenjualan as $item) {
-                $produk = Produk::lockForUpdate()->find($item->product_id);
-
-                if (!$produk) {
-                    throw new \Exception('Produk ' . $item->product_name . ' tidak ditemukan.');
+                if ($penjualanTerkunci->payment_status === 'paid') {
+                    throw new \Exception('Pesanan sudah dibayar oleh kasir lain.');
                 }
 
-                if ($produk->stock < $item->quantity) {
-                    throw new \Exception('Stok tidak mencukupi untuk ' . $produk->name . '. Sisa stok: ' . $produk->stock);
+                foreach ($penjualanTerkunci->itemPenjualan as $item) {
+                    $produk = Produk::lockForUpdate()->find($item->product_id);
+
+                    if (!$produk) {
+                        throw new \Exception('Produk ' . $item->product_name . ' tidak ditemukan.');
+                    }
+
+                    if ($produk->stock < $item->quantity) {
+                        throw new \Exception('Stok tidak mencukupi untuk ' . $produk->name . '. Sisa stok: ' . $produk->stock);
+                    }
+
+                    $stokSebelum = $produk->stock;
+                    $produk->decrement('stock', $item->quantity);
+                    $stokSesudah = $produk->fresh()->stock;
+
+                    MutasiStok::create([
+                        'product_id'       => $produk->id,
+                        'type'             => 'out',
+                        'reference_type'   => 'sale',
+                        'reference_id'     => $penjualanTerkunci->id,
+                        'reference_number' => $penjualanTerkunci->sale_number,
+                        'quantity'         => $item->quantity,
+                        'before_stock'     => $stokSebelum,
+                        'after_stock'      => $stokSesudah,
+                        'notes'            => 'Penjualan ke kasir ' . (auth()->user()->name ?? 'Kasir'),
+                        'user_id'          => auth()->id(),
+                    ]);
+
+                    $item->update(['status' => 'queued']);
                 }
 
-                $stokSebelum = $produk->stock;
-                $produk->decrement('stock', $item->quantity);
-                $stokSesudah = $produk->fresh()->stock;
-
-                MutasiStok::create([
-                    'product_id'       => $produk->id,
-                    'type'             => 'out',
-                    'reference_type'   => 'sale',
-                    'reference_id'     => $penjualanTerkunci->id,
-                    'reference_number' => $penjualanTerkunci->sale_number,
-                    'quantity'         => $item->quantity,
-                    'before_stock'     => $stokSebelum,
-                    'after_stock'      => $stokSesudah,
-                    'notes'            => 'Penjualan ke kasir ' . (auth()->user()->name ?? 'Kasir'),
-                    'user_id'          => auth()->id(),
+                $penjualanTerkunci->update([
+                    'payment_status' => 'paid',
+                    'order_status'   => 'queued',
+                    'payment_method' => $request->payment_method,
+                    'cash_received'  => $uangDiterima,
+                    'cash_change'    => $kembalian,
+                    'paid_at'        => Carbon::now(),
+                    'user_id'        => auth()->id(),
                 ]);
 
-                $item->update(['status' => 'queued']);
-            }
-
-            $penjualanTerkunci->update([
-                'payment_status' => 'paid',
-                'order_status'   => 'queued',
-                'payment_method' => $request->payment_method,
-                'cash_received'  => $uangDiterima,
-                'cash_change'    => $kembalian,
-                'paid_at'        => Carbon::now(),
-                'user_id'        => auth()->id(),
-            ]);
-
-            RiwayatStatusPesanan::create([
-                'sale_id'    => $penjualanTerkunci->id,
-                'from_status' => 'waiting_payment',
-                'to_status'  => 'queued',
-                'staff_name' => 'Kasir: ' . (auth()->user()->name ?? 'Staff'),
-                'user_id'    => auth()->id(),
-                'notes'      => 'Pembayaran ' . strtoupper($request->payment_method) . ' berhasil dikonfirmasi.',
-            ]);
-        });
+                RiwayatStatusPesanan::create([
+                    'sale_id'    => $penjualanTerkunci->id,
+                    'from_status' => 'waiting_payment',
+                    'to_status'  => 'queued',
+                    'staff_name' => 'Kasir: ' . (auth()->user()->name ?? 'Staff'),
+                    'user_id'    => auth()->id(),
+                    'notes'      => 'Pembayaran ' . strtoupper($request->payment_method) . ' berhasil dikonfirmasi.',
+                ]);
+            });
+        } catch (\Throwable $e) {
+            return back()->withInput()->with('error', $e->getMessage());
+        }
 
         session()->flash('payment_success_modal', true);
 

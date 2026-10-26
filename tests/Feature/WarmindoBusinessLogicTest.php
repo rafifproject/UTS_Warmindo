@@ -363,15 +363,14 @@ class WarmindoBusinessLogicTest extends TestCase
             'subtotal'     => $product->sell_price * $excessQuantity,
         ]);
 
-        // Coba bayar di kasir, sistem harus melempar exception dan rollback DB::transaction
-        try {
-            $this->actingAs($staff)->post("/kasir/pay/{$sale->sale_number}", [
-                'cash_received'  => ($product->sell_price * $excessQuantity) + 10000,
-                'payment_method' => 'cash',
-            ]);
-        } catch (\Exception $e) {
-            $this->assertStringContainsString('Stok tidak mencukupi', $e->getMessage());
-        }
+        // Coba bayar di kasir, sistem menolak dengan pesan error dan me-rollback DB::transaction
+        $response = $this->actingAs($staff)->post("/kasir/pay/{$sale->sale_number}", [
+            'cash_received'  => ($product->sell_price * $excessQuantity) + 10000,
+            'payment_method' => 'cash',
+        ]);
+
+        $response->assertSessionHas('error');
+        $this->assertStringContainsString('Stok tidak mencukupi', session('error'));
 
         // Verifikasi Rollback: Stok fisik produk TIDAK BERUBAH sama sekali
         $product->refresh();

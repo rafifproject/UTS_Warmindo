@@ -73,6 +73,17 @@ Berikut adalah tangkapan layar langsung (*live capture*) dari seluruh modul sist
 
 ---
 
+### 2.4 Tangkapan Layar Pengujian Transaksi, Stok & Rollback (Slide 27 Butir 5 & 6)
+| 11. Form Pembelian Stok Masuk dari Pemasok (`/admin/purchases/create`) | 12. Buku Besar Audit Mutasi Stok (`/admin/products/stock-mutations`) |
+| :---: | :---: |
+| ![Form Pembelian Stok](public/images/screenshots/11-admin-purchase-create.png) | ![Mutasi Stok](public/images/screenshots/12-admin-stock-mutations.png) |
+
+| 13. Uji Penjualan: Penolakan Stok Kurang & Rollback Kasir (`/kasir/pay`) | 14. Peringatan Stok Menipis / Restock Alert (`/admin/products/low-stock`) |
+| :---: | :---: |
+| ![Stok Kurang & Rollback](public/images/screenshots/13-kasir-stok-tidak-cukup.png) | ![Peringatan Stok Menipis](public/images/screenshots/14-admin-low-stock.png) |
+
+---
+
 ## 3. System Requirements
 
 - **PHP:** Versi `>= 8.1` (Mendukung PHP 8.1, 8.2, 8.3)
@@ -572,6 +583,10 @@ Berikut adalah bukti implementasi teknis dan skenario pengujian untuk dua butir 
      ```
   4. Sistem mencatat riwayat ke buku besar `stock_mutations` dengan tipe `'in'`, menyimpan kuantitas, saldo sebelum (`before_stock`), dan saldo sesudah (`after_stock`).
 - **Bukti Uji Otomatis:** Skenario `test_purchase_increases_stock_and_logs_mutation()` memverifikasi bahwa setelah transaksi pembelian sukses, nilai stok produk di database bertambah persis sebesar kuantitas yang dibeli dan mutasi tipe `in` tersimpan lengkap (**Status: PASS**).
+- **Tangkapan Layar Langsung dari Web:**
+  | Form Pembelian Bahan Baku (Input Kuantitas Restock) | Audit Buku Besar Mutasi Stok Masuk (Tipe IN Otomatis) |
+  | :---: | :---: |
+  | ![Form Pembelian Stok Masuk](public/images/screenshots/11-admin-purchase-create.png) | ![Mutasi Stok Masuk](public/images/screenshots/12-admin-stock-mutations.png) |
 
 #### 🔴 Butir 6: Implementasikan sales; uji stok tidak cukup dan rollback
 - **Lokasi Kode:** `app/Http/Controllers/KontrollerKasir.php` (metode `prosesBayar()`) dan `app/Http/Controllers/KontrollerKeranjang.php` (metode `checkout()`).
@@ -588,6 +603,10 @@ Berikut adalah bukti implementasi teknis dan skenario pengujian untuk dua butir 
      - Status pembayaran **tetap `pending`** (tidak berubah menjadi `paid`).
      - Tidak ada rekaman `stock_mutations` palsu atau baris data yang tersimpan setengah.
 - **Bukti Uji Otomatis:** Skenario `test_sales_fails_and_rollbacks_when_stock_insufficient()` mensimulasikan kasir memproses pesanan dengan kuantitas melebihi stok gudang (stok + 50). Sistem melempar exception, melakukan *rollback* total, dan memverifikasi bahwa stok fisik tidak berkurang sedikitpun (**Status: PASS**).
+- **Tangkapan Layar Langsung dari Web:**
+  | Uji Kasir: Penolakan Transaksi Saat Stok Kurang (Pesan Peringatan & Rollback) | Pantauan Dashboard: Peringatan Stok Menipis (*Low Stock Alert*) |
+  | :---: | :---: |
+  | ![Uji Stok Tidak Cukup & Rollback](public/images/screenshots/13-kasir-stok-tidak-cukup.png) | ![Peringatan Stok Menipis](public/images/screenshots/14-admin-low-stock.png) |
 
 ---
 
