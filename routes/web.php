@@ -125,3 +125,4 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('ai-assistant', [AdminAiAssistantController::class, 'index'])->name('ai.index');
     Route::match(['get', 'post'], 'ai-assistant/analyze', [AdminAiAssistantController::class, 'analyze'])->name('ai.analyze');
 });
+
