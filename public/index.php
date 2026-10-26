@@ -48,6 +48,15 @@ $app = require_once __DIR__.'/../bootstrap/app.php';
 
 $kernel = $app->make(Kernel::class);
 
+if (isset($_SERVER['REQUEST_URI'], $_SERVER['SCRIPT_NAME'])) {
+    if (str_contains($_SERVER['SCRIPT_NAME'], '/public/index.php') && !str_contains($_SERVER['REQUEST_URI'], '/public')) {
+        $_SERVER['SCRIPT_NAME'] = str_replace('/public/index.php', '/index.php', $_SERVER['SCRIPT_NAME']);
+        if (isset($_SERVER['PHP_SELF'])) {
+            $_SERVER['PHP_SELF'] = str_replace('/public/index.php', '/index.php', $_SERVER['PHP_SELF']);
+        }
+    }
+}
+
 $response = $kernel->handle(
     $request = Request::capture()
 )->send();

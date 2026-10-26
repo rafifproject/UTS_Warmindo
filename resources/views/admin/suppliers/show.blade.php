@@ -65,7 +65,7 @@
           </tr>
         </thead>
         <tbody>
-          @forelse($supplier->purchases as $p)
+          @forelse(($supplier->purchases ?? $supplier->pembelian ?? []) as $p)
             <tr>
               <td style="padding-left: 24px; font-weight: 700; color: var(--primary);">
                 #{{ $p->purchase_number }}

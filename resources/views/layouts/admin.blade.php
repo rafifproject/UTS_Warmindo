@@ -100,24 +100,6 @@
             <span>AI Business Assistant</span>
           </a>
         </li>
-
-        <li class="sidebar-header">OPERASIONAL OUTLET</li>
-        <li class="sidebar-item">
-          <a href="{{ route('kasir.dashboard') }}" class="sidebar-link">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/>
-            </svg>
-            <span>Buka Halaman Kasir</span>
-          </a>
-        </li>
-        <li class="sidebar-item">
-          <a href="{{ route('kitchen.dashboard') }}" class="sidebar-link">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a4 4 0 0 0 0-8z"/>
-            </svg>
-            <span>Antrean Dapur (KDS)</span>
-          </a>
-        </li>
       </ul>
 
       <!-- Sidebar User Footer -->

@@ -1,20 +1,20 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\PublicController;
-use App\Http\Controllers\CartController;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\KasirController;
-use App\Http\Controllers\KitchenController;
-use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
-use App\Http\Controllers\Admin\UserController as AdminUserController;
-use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
-use App\Http\Controllers\Admin\ProductController as AdminProductController;
-use App\Http\Controllers\Admin\SupplierController as AdminSupplierController;
-use App\Http\Controllers\Admin\PurchaseController as AdminPurchaseController;
-use App\Http\Controllers\Admin\SaleController as AdminSaleController;
-use App\Http\Controllers\Admin\ReportController as AdminReportController;
-use App\Http\Controllers\Admin\AiAssistantController as AdminAiAssistantController;
+use App\Http\Controllers\KontrollerPublik as PublicController;
+use App\Http\Controllers\KontrollerKeranjang as CartController;
+use App\Http\Controllers\KontrollerAutentikasi as AuthController;
+use App\Http\Controllers\KontrollerKasir as KasirController;
+use App\Http\Controllers\KontrollerDapur as KitchenController;
+use App\Http\Controllers\Admin\KontrollerDasbor as AdminDashboardController;
+use App\Http\Controllers\Admin\KontrollerPengguna as AdminUserController;
+use App\Http\Controllers\Admin\KontrollerKategori as AdminCategoryController;
+use App\Http\Controllers\Admin\KontrollerProduk as AdminProductController;
+use App\Http\Controllers\Admin\KontrollerPemasok as AdminSupplierController;
+use App\Http\Controllers\Admin\KontrollerPembelian as AdminPurchaseController;
+use App\Http\Controllers\Admin\KontrollerPenjualan as AdminSaleController;
+use App\Http\Controllers\Admin\KontrollerLaporan as AdminReportController;
+use App\Http\Controllers\Admin\KontrollerAsistenAi as AdminAiAssistantController;
 
 /*
 |--------------------------------------------------------------------------
@@ -123,5 +123,5 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // AI Business Assistant (Screen I)
     Route::get('ai-assistant', [AdminAiAssistantController::class, 'index'])->name('ai.index');
-    Route::post('ai-assistant/analyze', [AdminAiAssistantController::class, 'analyze'])->name('ai.analyze');
+    Route::match(['get', 'post'], 'ai-assistant/analyze', [AdminAiAssistantController::class, 'analyze'])->name('ai.analyze');
 });

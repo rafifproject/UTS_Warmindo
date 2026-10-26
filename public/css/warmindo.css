@@ -1171,3 +1171,70 @@ h1, h2, h3, h4, h5, h6 {
     grid-template-columns: 1fr;
   }
 }
+
+/* Pagination Styling & SVG Constraint */
+.pagination {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  padding-left: 0 !important;
+  list-style: none !important;
+  gap: 4px !important;
+  align-items: center !important;
+  margin: 0 !important;
+}
+
+.pagination .page-item {
+  margin: 0 !important;
+}
+
+.pagination .page-link {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 32px !important;
+  height: 32px !important;
+  padding: 0 8px !important;
+  border-radius: var(--radius-sm, 6px) !important;
+  border: 1px solid var(--border-light, #E2E8F0) !important;
+  background-color: #FFFFFF !important;
+  color: var(--text-dark, #1E293B) !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+  transition: all 0.2s ease !important;
+}
+
+.pagination .page-item.active .page-link {
+  background-color: var(--primary, #164032) !important;
+  border-color: var(--primary, #164032) !important;
+  color: #FFFFFF !important;
+}
+
+.pagination .page-item.disabled .page-link {
+  opacity: 0.4 !important;
+  pointer-events: none !important;
+  background-color: #F8FAFC !important;
+}
+
+.pagination .page-link:hover:not(.disabled) {
+  background-color: #F1F5F9 !important;
+  border-color: #CBD5E1 !important;
+}
+
+/* Prevent giant SVGs in Tailwind/Laravel paginator */
+nav[role="navigation"] svg,
+.pagination svg {
+  width: 16px !important;
+  height: 16px !important;
+  max-width: 16px !important;
+  max-height: 16px !important;
+  display: inline-block !important;
+  vertical-align: middle !important;
+}
+
+nav[role="navigation"] > div {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
