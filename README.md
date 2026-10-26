@@ -29,7 +29,7 @@ Aplikasi ini dikembangkan untuk memecahkan permasalahan operasional pada usaha k
 - **Ketidaksesuaian Stok Fisik:** Stok bahan/menu tidak tercatat otomatis saat terjadi penerimaan pasokan barang atau penjualan.
 - **Overselling:** Menu yang stoknya habis masih dapat dipesan oleh pelanggan.
 - **Kesulitan Penelusuran Riwayat:** Riwayat transaksi lampau, arus kas, dan mutasi stok sulit dilacak.
-- **Ketiadaan Pembatasan Akses:** Karyawan kasir dapat mengakses data sensitif laba dan akun admin.
+- **Ketiadaan Pembatasan Akses:** Karyawan kasir dapat mengakses data sensitif laba dan akun owner.
 - **Ketiadaan Ringkasan Bisnis:** Pemilik toko tidak memiliki dashboard analitik omzet dan peringatan stok menipis.
 
 ### 1.2 Tujuan & Nilai Utama Sistem
@@ -62,10 +62,10 @@ Berikut adalah tangkapan layar langsung (*live capture*) dari seluruh modul sist
 
 ---
 
-### 2.3 Dashboard & Manajemen Admin / Owner
+### 2.3 Dashboard & Manajemen Owner
 | 07. Dashboard Bisnis & Metrik Penjualan (`/admin`) | 08. Master Produk & Peringatan Stok Menipis (`/admin/products`) |
 | :---: | :---: |
-| ![Admin Dashboard](public/images/screenshots/07-admin-dashboard.png) | ![Master Produk](public/images/screenshots/08-admin-products.png) |
+| ![Dashboard Owner](public/images/screenshots/07-admin-dashboard.png) | ![Master Produk](public/images/screenshots/08-admin-products.png) |
 
 | 09. Pembelian Stok Masuk dari Pemasok (`/admin/purchases`) | 10. 7 Laporan Interaktif & Ekspor CSV (`/admin/reports`) |
 | :---: | :---: |
@@ -188,7 +188,7 @@ Diagram alur kerja komprehensif (**Flowmap Sistem Web Warmindo**) di bawah ini m
 > - 🔴 **Customer (Publik):** Alur pemesanan mandiri oleh pelanggan melalui antarmuka web responsif.
 > - 🔵 **Kasir (Staff):** Alur operasional kasir (pencarian pesanan, penerimaan pembayaran tunai/QRIS/transfer, dan pemotongan stok otomatis).
 > - 🟣 **Dapur (Staff):** Alur kerja koki dapur pada *Kitchen Display System* (KDS) dari pesanan masuk, proses memasak, hingga siap saji.
-> - 🟢 **Admin / Owner:** Alur tata kelola inventori bahan/produk, master data, pembelian pasokan (*Stock-In*), manajemen staf, dan laporan bisnis.
+> - 🟢 **Owner:** Alur tata kelola inventori bahan/produk, master data, pembelian pasokan (*Stock-In*), manajemen staf, dan laporan bisnis.
 > - 🔷 **Sistem / Proses:** Eksekusi logika bisnis Laravel (validasi request, kalkulasi subtotal, `DB::transaction()`, dan *pessimistic locking*).
 > - 🟡 **Database:** Manipulasi data MySQL InnoDB (tabel `products`, `sales`, `sale_items`, `stock_mutations`, `purchases`, dll).
 > - 🔶 **Keputusan:** Validasi kondisi krusial (Kecukupan Uang Pembayaran & Ketersediaan Stok Fisik).
@@ -645,8 +645,8 @@ Pengujian dilakukan menggunakan Automated Feature Test Suite (`php artisan test`
   ✓ take away checkout sets table number to null
   ✓ cashier rejects insufficient cash payment
   ✓ cashier payment confirmation reduces stock atomically
-  ✓ admin cancel paid sale restores stock
-  ✓ admin can access reports
+  ✓ owner cancel paid sale restores stock
+  ✓ owner can access reports
   ✓ ai business assistant generates analysis
   ✓ purchase increases stock and logs mutation
   ✓ sales fails and rollbacks when stock insufficient
@@ -682,9 +682,9 @@ Pertanyaan-pertanyaan di bawah ini dirancang khusus untuk menghadapi evaluasi do
 ### Q5: Bagaimana mencegah Staff mengakses fungsi Owner melalui URL langsung?
 > **Jawaban:** Menggunakan **Middleware Otorisasi** di file `routes/web.php`:
 > ```php
-> Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(...);
+> Route::middleware(['auth', 'role:owner'])->prefix('admin')->group(...);
 > ```
-> Jika akun staf mencoba mengetikkan `/admin/users` di URL browser, sistem langsung mencegatnya dengan respon `403 Forbidden`.
+> Jika akun staf mencoba mengetikkan URL dashboard owner (`/admin/users`) di browser, sistem langsung mencegatnya dengan respon `403 Forbidden`.
 
 ### Q6: Apa yang terjadi jika dua penjualan memproses stok produk yang sama hampir bersamaan?
 > **Jawaban:** Dapat terjadi *Race Condition* di mana kedua kasir membaca stok yang sama padahal stok hanya tersisa satu. Sistem mengatasinya dengan **Pessimistic Locking**:

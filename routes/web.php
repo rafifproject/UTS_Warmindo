@@ -78,11 +78,11 @@ Route::middleware(['auth'])->prefix('dapur')->name('kitchen.')->group(function (
 
 /*
 |--------------------------------------------------------------------------
-| Admin / Owner Routes (Screens A-I)
-| Protected strictly with role: admin
+| Owner Routes (Screens A-I)
+| Protected strictly with role: owner, admin
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'role:owner,admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
 
     // User Management (Screen B)
@@ -125,4 +125,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('ai-assistant', [AdminAiAssistantController::class, 'index'])->name('ai.index');
     Route::match(['get', 'post'], 'ai-assistant/analyze', [AdminAiAssistantController::class, 'analyze'])->name('ai.analyze');
 });
+
+// Alias /owner URL route to support direct access
+Route::middleware(['auth', 'role:owner,admin'])->prefix('owner')->group(function () {
+    Route::get('/', fn() => redirect()->route('admin.dashboard'))->name('owner.dashboard');
+    Route::get('/{any}', fn($any) => redirect('/admin/' . $any))->where('any', '.*');
+});
+
 

@@ -217,11 +217,11 @@ class WarmindoBusinessLogicTest extends TestCase
     }
 
     /**
-     * Test 8: Pembatalan pesanan lunas oleh Admin mengembalikan stok secara atomik
+     * Test 8: Pembatalan pesanan lunas oleh Owner mengembalikan stok secara atomik
      */
-    public function test_admin_cancel_paid_sale_restores_stock()
+    public function test_owner_cancel_paid_sale_restores_stock()
     {
-        $admin = User::where('role', 'admin')->first();
+        $owner = User::where('role', 'owner')->first() ?? User::where('role', 'admin')->first();
         $product = Product::where('stock', '>=', 5)->first();
         $initialStock = $product->stock;
 
@@ -249,7 +249,7 @@ class WarmindoBusinessLogicTest extends TestCase
         // Reduce stock as if it was already deducted on payment
         $product->decrement('stock', 1);
 
-        $response = $this->actingAs($admin)->post("/admin/sales/{$sale->id}/cancel", [
+        $response = $this->actingAs($owner)->post("/admin/sales/{$sale->id}/cancel", [
             'reason' => 'Customer batal karena ada keperluan darurat',
         ]);
 
@@ -263,17 +263,17 @@ class WarmindoBusinessLogicTest extends TestCase
     }
 
     /**
-     * Test 9: Laporan Penjualan dapat diakses oleh Admin dengan data konsisten
+     * Test 9: Laporan Penjualan dapat diakses oleh Owner dengan data konsisten
      */
-    public function test_admin_can_access_reports()
+    public function test_owner_can_access_reports()
     {
-        $admin = User::where('role', 'admin')->first();
+        $owner = User::where('role', 'owner')->first() ?? User::where('role', 'admin')->first();
 
-        $response = $this->actingAs($admin)->get('/admin/reports/sales');
+        $response = $this->actingAs($owner)->get('/admin/reports/sales');
         $response->assertStatus(200);
         $response->assertSee('Laporan Penjualan');
 
-        $responseTop = $this->actingAs($admin)->get('/admin/reports/top-menus');
+        $responseTop = $this->actingAs($owner)->get('/admin/reports/top-menus');
         $responseTop->assertStatus(200);
         $responseTop->assertSee('Laporan Menu Terlaris');
     }
