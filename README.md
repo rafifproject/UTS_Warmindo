@@ -166,6 +166,24 @@ Semua akun demo menggunakan password bawaan: `password`
 
 ## 8. Features & Alur Modul Sistem
 
+### 8.0 Flowmap Arsitektur Sistem Terintegrasi
+Diagram alur kerja komprehensif (**Flowmap Sistem Web Warmindo**) di bawah ini memetakan integrasi proses *end-to-end* antar entitas aktor (**Pelanggan, Kasir, Dapur, Owner**), lapisan logika **Sistem (Laravel Web Application)**, **Database MySQL**, serta **AI Service**:
+
+<p align="center">
+  <img src="public/images/flowmap-sistem-warmindo.png" alt="Flowmap Sistem Web Warmindo - Integrasi Pemesanan, Kasir, Dapur, Inventori, Laporan dan Analitik" width="100%">
+</p>
+
+> **Panduan Keterangan Warna Swimlane:**
+> - 🔴 **Customer (Publik):** Alur pemesanan mandiri oleh pelanggan melalui antarmuka web responsif.
+> - 🔵 **Kasir (Staff):** Alur operasional kasir (pencarian pesanan, penerimaan pembayaran tunai/QRIS/transfer, dan pemotongan stok otomatis).
+> - 🟣 **Dapur (Staff):** Alur kerja koki dapur pada *Kitchen Display System* (KDS) dari pesanan masuk, proses memasak, hingga siap saji.
+> - 🟢 **Admin / Owner:** Alur tata kelola inventori bahan/produk, master data, pembelian pasokan (*Stock-In*), manajemen staf, dan laporan bisnis.
+> - 🔷 **Sistem / Proses:** Eksekusi logika bisnis Laravel (validasi request, kalkulasi subtotal, `DB::transaction()`, dan *pessimistic locking*).
+> - 🟡 **Database:** Manipulasi data MySQL InnoDB (tabel `products`, `sales`, `sale_items`, `stock_mutations`, `purchases`, dll).
+> - 🔶 **Keputusan:** Validasi kondisi krusial (Kecukupan Uang Pembayaran & Ketersediaan Stok Fisik).
+
+---
+
 Sistem mengintegrasikan seluruh alur operasional Warmindo:
 
 ### 8.1 Alur Publik (Pemesanan Pelanggan)
@@ -193,6 +211,26 @@ Sistem mengintegrasikan seluruh alur operasional Warmindo:
 3. **Pembatalan Penjualan (Stock Restore):** Transaksi yang dibatalkan oleh Owner secara otomatis mengembalikan stok produk ke gudang.
 4. **7 Laporan Interaktif:** Laporan Penjualan, Transaksi, Menu Terlaris, Stok, Pembelian, Dine In vs Take Away, dan Pembayaran (dengan fitur toggle Chart visual, Tabel data mentah, dan Ekspor CSV).
 5. **AI Business Assistant:** Analitik bisnis otomatis untuk membaca metrik omzet dan rekomendasi restock bahan baku.
+
+### 8.5 Alur Modul Laporan Interaktif (7 Laporan Bisnis)
+Sesuai panel ke-5 pada Flowmap, sistem menyediakan 7 modul laporan komprehensif yang dilengkapi **Chart Visual**, **Tabel Data Mentah**, Filter Rentang Tanggal, Filter Kategori/Status, Pagination, dan Fitur Ekspor CSV:
+
+| No | Modul Laporan | Tampilan Visual (Chart) | Tampilan Rincian Data Mentah |
+| :-: | :--- | :--- | :--- |
+| **1** | **Laporan Penjualan** | Tren penjualan (per hari, minggu, bulan) | Tanggal, No Transaksi, Total Omzet, Status |
+| **2** | **Laporan Transaksi** | Jumlah volume transaksi per periode | Rincian setiap transaksi struk kasir |
+| **3** | **Menu Terlaris** | Grafik porsi menu paling laku | Nama Menu, Kuantitas Terjual, Total Omzet |
+| **4** | **Laporan Stok** | Perbandingan stok aktual vs batas minimum | Kode SKU, Nama Produk, Stok, Minimum Stok |
+| **5** | **Laporan Pembelian** | Nilai pengeluaran pembelian pasokan per periode | No Faktur, Tanggal, Rekanan Supplier, Total Belanja |
+| **6** | **Dine In vs Take Away** | Perbandingan persentase tipe layanan | No Pesanan, Jenis Layanan, No Meja, Total Tagihan |
+| **7** | **Laporan Pembayaran** | Grafik distribusi metode pembayaran (Tunai/QRIS) | No Struk, Metode Bayar, Nominal, Status, Waktu |
+
+### 8.6 Alur AI Business Assistant (Analitik Cerdas)
+Sesuai panel ke-6 pada Flowmap, Owner dapat meminta analisis otomatis terhadap data performa usaha dengan alur:
+1. **Owner:** Menentukan modul laporan dan rentang periode, lalu menekan tombol **"Analisis dengan AI"**.
+2. **Sistem:** Menghimpun agregat metrik dari database (omzet, menu terlaris, persediaan kritis, tren layanan).
+3. **AI Service:** Memproses *prompt* data dan menghasilkan evaluasi komprehensif: tren penjualan, identifikasi menu kurang laku, peringatan stok menipis beserta rekomendasi kuantitas restock.
+4. **Tampilan:** Menyajikan *actionable insight* dan rekomendasi bisnis langsung di layar dashboard Owner.
 
 ---
 
