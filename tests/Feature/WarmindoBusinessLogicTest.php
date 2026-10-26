@@ -385,5 +385,47 @@ class WarmindoBusinessLogicTest extends TestCase
             ->first();
         $this->assertNull($mutation);
     }
+
+    /**
+     * Test 13: Kasir konfirmasi pembayaran QRIS berhasil mencatat payment_method = qris
+     */
+    public function test_cashier_qris_payment_confirmation_succeeds()
+    {
+        $staff = User::where('role', 'staff')->first();
+        $product = Product::where('stock', '>=', 5)->first();
+
+        $sale = Sale::create([
+            'sale_number' => 'PSN-QRISTEST-' . time(),
+            'order_type' => 'dine_in',
+            'table_number' => '09',
+            'subtotal' => $product->sell_price,
+            'service_fee' => 0,
+            'total_amount' => $product->sell_price,
+            'payment_status' => 'pending',
+            'order_status' => 'waiting_payment',
+        ]);
+
+        SaleItem::create([
+            'sale_id' => $sale->id,
+            'product_id' => $product->id,
+            'product_name' => $product->name,
+            'price' => $product->sell_price,
+            'quantity' => 1,
+            'subtotal' => $product->sell_price,
+        ]);
+
+        $response = $this->actingAs($staff)->post("/kasir/pay/{$sale->sale_number}", [
+            'payment_method' => 'qris',
+        ]);
+
+        $response->assertRedirect();
+        $sale->refresh();
+
+        $this->assertEquals('paid', $sale->payment_status);
+        $this->assertEquals('qris', $sale->payment_method);
+        $this->assertEquals('queued', $sale->order_status);
+        $this->assertEquals($sale->total_amount, $sale->cash_received);
+        $this->assertEquals(0, $sale->cash_change);
+    }
 }
 

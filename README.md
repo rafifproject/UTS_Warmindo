@@ -628,6 +628,7 @@ Pengujian dilakukan menggunakan Automated Feature Test Suite (`php artisan test`
 | 10 | **AI Assistant** | Generate analitik rekomendasi bisnis | Ringkasan performa dan stok tampil sukses | **PASS** |
 | 11 | **Purchase Stock-In (Slide 27 #5)** | Input nota pembelian stok masuk dari supplier | Stok produk bertambah & mutasi `in` tercatat | **PASS** |
 | 12 | **Sales Rollback (Slide 27 #6)** | Transaksi pesanan dengan kuantitas melebihi stok | Transaksi ditolak, DB rollback, stok utuh | **PASS** |
+| 13 | **Cashier QRIS Payment** | Kasir konfirmasi pembayaran pesanan via QRIS | Status paid, method qris, stok berkurang | **PASS** |
 
 ### Log Hasil Eksekusi Test:
 ```text
@@ -650,9 +651,10 @@ Pengujian dilakukan menggunakan Automated Feature Test Suite (`php artisan test`
   ✓ ai business assistant generates analysis
   ✓ purchase increases stock and logs mutation
   ✓ sales fails and rollbacks when stock insufficient
+  ✓ cashier qris payment confirmation succeeds
 
-  Tests:    14 passed (46 assertions)
-  Duration: 1.42s
+  Tests:    15 passed (54 assertions)
+  Duration: 1.11s
 ```
 
 ---
