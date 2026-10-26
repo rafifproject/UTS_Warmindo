@@ -34,9 +34,14 @@ class Pengguna extends Authenticatable
         'password'          => 'hashed',
     ];
 
+    public function isOwner(): bool
+    {
+        return in_array($this->role, ['owner', 'admin']);
+    }
+
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return $this->isOwner();
     }
 
     public function isStaff(): bool

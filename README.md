@@ -138,7 +138,7 @@ php artisan migrate:fresh --seed
 
 Perintah di atas akan menyiapkan:
 1. Skema 10 tabel inti sistem.
-2. Akun demo bawaan (Admin Owner, Staf Kasir, dan Staf Dapur).
+2. Akun demo bawaan (Owner Warmindo, Staf Kasir, dan Staf Dapur).
 3. 4 Kategori produk (Mie, Minuman, Snack, Nasi).
 4. 12 Menu produk dengan foto resolusi tinggi, harga beli, harga jual, dan stok awal.
 5. 3 Data pemasok (supplier) bahan baku.
@@ -157,7 +157,7 @@ Semua akun demo menggunakan password bawaan: `password`
 
 | Peran (Role) | Email | Username | Password | Wewenang & Batasan Akses |
 | :--- | :--- | :--- | :--- | :--- |
-| **Admin / Owner** | `admin@warmindo.id` | `admin` | `password` | **Full Control:** Master Data (Kategori, Produk, Pemasok), Pembelian Bahan (*Stock-In*), Riwayat & Pembatalan Penjualan (*Stock Restore*), Manajemen Akun Staf, 7 Laporan Interaktif, AI Business Assistant. |
+| **Owner Warmindo** | `owner@warmindo.id` | `owner` | `password` | **Full Control (Pemilik):** Master Data (Kategori, Produk, Pemasok), Pembelian Bahan (*Stock-In*), Riwayat & Pembatalan Penjualan (*Stock Restore*), Manajemen Akun Staf, 7 Laporan Interaktif, AI Business Assistant. |
 | **Staff (Kasir)** | `kasir@warmindo.id` | `siti` | `password` | **Operasional Kasir:** Dashboard kasir, antrean belum lunas, pembayaran tunai/QRIS/transfer, kalkulator kembalian, cetak struk. (*Pemotongan stok terjadi di sini secara atomik*). |
 | **Staff (Dapur / KDS)** | `budi@warmindo.id` | `budi` | `password` | **Layar Dapur:** Menerima antrean pesanan yang **sudah lunas**, menggeser status pengerjaan (*Diterima ➔ Dimasak ➔ Siap Saji ➔ Selesai*). |
 | **Customer** | *(Tanpa Login)* | *(Tamu)* | *(Tanpa Auth)* | **Pemesanan Mandiri:** Beranda, katalog filter, keranjang, pilihan layanan Dine In (wajib meja) / Take Away, checkout instan. |
@@ -187,10 +187,10 @@ Sistem mengintegrasikan seluruh alur operasional Warmindo:
 2. **Stepper Pengerjaan:** Koki menggeser status pesanan: *Queued &rarr; Preparing &rarr; Ready to Serve &rarr; Completed*.
 3. **Riwayat Log Dapur:** Mencatat timestamp dan nama staf yang memproses setiap tahapan.
 
-### 8.4 Alur Admin & Inventori
+### 8.4 Alur Owner & Inventori
 1. **Master Data CRUD:** Kategori, Produk (SKU unik, harga beli/jual, stok, min-stock), dan Pemasok.
 2. **Pembelian Bahan Baku (Purchases / Stock-In):** Form pembelian multi-item yang secara otomatis menambah stok produk (`increment('stock')`) dan mencatat mutasi `in`.
-3. **Pembatalan Penjualan (Stock Restore):** Transaksi yang dibatalkan oleh Admin secara otomatis mengembalikan stok produk ke gudang.
+3. **Pembatalan Penjualan (Stock Restore):** Transaksi yang dibatalkan oleh Owner secara otomatis mengembalikan stok produk ke gudang.
 4. **7 Laporan Interaktif:** Laporan Penjualan, Transaksi, Menu Terlaris, Stok, Pembelian, Dine In vs Take Away, dan Pembayaran (dengan fitur toggle Chart visual, Tabel data mentah, dan Ekspor CSV).
 5. **AI Business Assistant:** Analitik bisnis otomatis untuk membaca metrik omzet dan rekomendasi restock bahan baku.
 
@@ -364,13 +364,13 @@ Pengujian dilakukan menggunakan Automated Feature Test Suite (`php artisan test`
 | :-: | :--- | :--- | :--- | :---: |
 | 1 | **Auth** | Tamu mengakses `/admin` atau `/kasir` tanpa login | Redirect ke `/login` | **PASS** |
 | 2 | **Auth Failure** | Login dengan password salah | Ditolak dengan pesan error inline | **PASS** |
-| 3 | **Authorization** | Akun Staff membuka menu Admin (`/admin/users`) | Ditolak dengan status `403 Forbidden` | **PASS** |
+| 3 | **Authorization** | Akun Staff membuka menu Owner (`/admin/users`) | Ditolak dengan status `403 Forbidden` | **PASS** |
 | 4 | **Dine In Service** | Checkout Dine In tanpa menginput nomor meja | Validasi gagal, wajib isi nomor meja | **PASS** |
 | 5 | **Take Away Service**| Checkout Take Away | Nomor meja otomatis disimpan `NULL` | **PASS** |
 | 6 | **Payment Validation**| Kasir input uang tunai kurang dari tagihan | Transaksi ditolak, modal peringatan muncul | **PASS** |
 | 7 | **Sale Stock-out** | Kasir konfirmasi pembayaran pesanan | Stok produk berkurang tepat & mutasi tercatat | **PASS** |
-| 8 | **Sale Cancel** | Admin membatalkan transaksi penjualan lunas | Stok produk bertambah kembali (*restored*) | **PASS** |
-| 9 | **Admin Reports** | Akses 7 modul laporan bisnis | Grafik & data mentah termuat sempurna | **PASS** |
+| 8 | **Sale Cancel** | Owner membatalkan transaksi penjualan lunas | Stok produk bertambah kembali (*restored*) | **PASS** |
+| 9 | **Owner Reports** | Akses 7 modul laporan bisnis | Grafik & data mentah termuat sempurna | **PASS** |
 | 10 | **AI Assistant** | Generate analitik rekomendasi bisnis | Ringkasan performa dan stok tampil sukses | **PASS** |
 
 ### Log Hasil Eksekusi Test:
@@ -421,7 +421,7 @@ Pertanyaan-pertanyaan di bawah ini dirancang khusus untuk menghadapi evaluasi do
 ### Q4: Apa risiko jika pengurangan stok dilakukan di luar `DB::transaction()`?
 > **Jawaban:** Risiko terjadinya **data setengah tersimpan (*inkonsistensi data*)**. Jika sistem error saat memotong stok item ke-3, penjualan sudah tercatat lunas tetapi stok sebagian produk tidak berkurang. Dengan `DB::transaction()`, bila terjadi satu kesalahan, seluruh operasi akan di-rollback ke kondisi awal.
 
-### Q5: Bagaimana mencegah Staff mengakses fungsi Admin melalui URL langsung?
+### Q5: Bagaimana mencegah Staff mengakses fungsi Owner melalui URL langsung?
 > **Jawaban:** Menggunakan **Middleware Otorisasi** di file `routes/web.php`:
 > ```php
 > Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(...);
@@ -448,7 +448,7 @@ Pertanyaan-pertanyaan di bawah ini dirancang khusus untuk menghadapi evaluasi do
 >     return $this->stock <= $this->min_stock;
 > }
 > ```
-> Indikator ini digunakan oleh Dashboard Admin untuk menampilkan badge peringatan merah secara otomatis saat stok fisik telah berada di bawah batas aman pemesanan ulang.
+> Indikator ini digunakan oleh Dashboard Owner untuk menampilkan badge peringatan merah secara otomatis saat stok fisik telah berada di bawah batas aman pemesanan ulang.
 
 ---
 

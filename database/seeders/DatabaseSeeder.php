@@ -21,10 +21,10 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // 1. Users
-        $admin = User::create([
-            'name' => 'Admin Owner',
-            'username' => 'admin',
-            'email' => 'admin@warmindo.id',
+        $owner = User::create([
+            'name' => 'Owner Warmindo',
+            'username' => 'owner',
+            'email' => 'owner@warmindo.id',
             'password' => Hash::make('password'),
             'role' => 'admin',
             'phone' => '0812-3456-7890',

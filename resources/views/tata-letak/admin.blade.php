@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>@yield('title', 'Admin Warmindo — Sistem Operasional & Owner Dashboard')</title>
+  <title>@yield('title', 'Owner Warmindo — Sistem Operasional & Dashboard Bisnis')</title>
   <link rel="stylesheet" href="{{ asset('css/warmindo.css') }}">
   <link rel="icon" type="image/svg+xml" href="{{ asset('images/logo.svg') }}">
   <!-- Chart.js for Interactive Visual Reports -->
@@ -105,11 +105,11 @@
       <!-- Sidebar User Footer -->
       <div class="sidebar-footer">
         <div class="sidebar-user-avatar">
-          {{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 2)) }}
+          {{ strtoupper(substr(auth()->user()->name ?? 'O', 0, 2)) }}
         </div>
         <div class="sidebar-user-info" style="flex: 1; overflow: hidden;">
-          <p style="font-size: 13.5px; font-weight: 700; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">{{ auth()->user()->name ?? 'Admin' }}</p>
-          <p style="font-size: 11.5px; opacity: 0.65; text-transform: uppercase;">{{ auth()->user()->role ?? 'Admin' }}</p>
+          <p style="font-size: 13.5px; font-weight: 700; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">{{ auth()->user()->name ?? 'Owner' }}</p>
+          <p style="font-size: 11.5px; opacity: 0.65; text-transform: uppercase;">OWNER</p>
         </div>
         <form action="{{ route('logout') }}" method="POST" style="margin: 0;">
           @csrf

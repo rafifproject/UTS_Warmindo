@@ -71,7 +71,7 @@
         <p style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 8px;">Akun Demo Pengujian:</p>
         <div style="font-size: 12.5px; line-height: 1.6; color: var(--text-body);">
           <div style="margin-bottom: 4px;">
-            <strong>Admin / Owner:</strong> <code style="background: #E9ECEF; padding: 2px 6px; border-radius: 4px;">admin@warmindo.id</code> / <code style="background: #E9ECEF; padding: 2px 6px; border-radius: 4px;">password</code>
+            <strong>Owner:</strong> <code style="background: #E9ECEF; padding: 2px 6px; border-radius: 4px;">owner@warmindo.id</code> (username: <code>owner</code>) / <code style="background: #E9ECEF; padding: 2px 6px; border-radius: 4px;">password</code>
           </div>
           <div>
             <strong>Kasir / Staff:</strong> <code style="background: #E9ECEF; padding: 2px 6px; border-radius: 4px;">kasir@warmindo.id</code> / <code style="background: #E9ECEF; padding: 2px 6px; border-radius: 4px;">password</code>

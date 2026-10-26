@@ -29,7 +29,7 @@
     </div>
     <div>
       <span style="color: var(--text-muted); font-size: 12.5px; display: block; margin-bottom: 4px;">Role Akses:</span>
-      <span style="font-weight: 700; color: var(--primary);">{{ $user->role === 'admin' ? 'Admin / Owner' : 'Staff Kasir / Dapur' }}</span>
+      <span style="font-weight: 700; color: var(--primary);">{{ ($user->role === 'admin' || $user->role === 'owner') ? 'Owner' : 'Staff Kasir / Dapur' }}</span>
     </div>
     <div>
       <span style="color: var(--text-muted); font-size: 12.5px; display: block; margin-bottom: 4px;">Nomor Telepon:</span>

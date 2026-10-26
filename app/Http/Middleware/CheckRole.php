@@ -31,7 +31,12 @@ class CheckRole
             return $next($request);
         }
 
-        if (in_array($user->role, $roles)) {
+        $userRoles = [$user->role];
+        if (in_array($user->role, ['owner', 'admin'])) {
+            $userRoles = ['owner', 'admin'];
+        }
+
+        if (array_intersect($userRoles, $roles)) {
             return $next($request);
         }
 

@@ -44,7 +44,7 @@
         <label class="form-label" for="role">Role Akses <span class="required">*</span></label>
         <select name="role" id="role" class="form-control form-select" required>
           <option value="staff" {{ old('role', $user->role) === 'staff' ? 'selected' : '' }}>Staff (Kasir & Dapur)</option>
-          <option value="admin" {{ old('role', $user->role) === 'admin' ? 'selected' : '' }}>Admin / Owner (Akses Penuh)</option>
+          <option value="admin" {{ old('role', $user->role) === 'admin' ? 'selected' : '' }}>Owner (Akses Penuh)</option>
         </select>
       </div>
 

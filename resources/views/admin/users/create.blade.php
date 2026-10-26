@@ -7,7 +7,7 @@
 <div class="card" style="max-width: 640px; margin: 0 auto; padding: 32px;">
   <div style="margin-bottom: 24px; border-bottom: 1px solid var(--border-light); padding-bottom: 16px;">
     <h3 style="font-size: 18px; font-weight: 800; color: var(--text-dark); margin-bottom: 4px;">Form Tambah Pengguna</h3>
-    <p style="font-size: 13px; color: var(--text-muted); margin: 0;">Buat akun untuk Admin Owner baru atau Staff Kasir / Petugas Dapur.</p>
+    <p style="font-size: 13px; color: var(--text-muted); margin: 0;">Buat akun untuk Owner baru atau Staff Kasir / Petugas Dapur.</p>
   </div>
 
   <form action="{{ route('admin.users.store') }}" method="POST">
@@ -47,7 +47,7 @@
         <label class="form-label" for="role">Role Akses <span class="required">*</span></label>
         <select name="role" id="role" class="form-control form-select" required>
           <option value="staff" {{ old('role') === 'staff' ? 'selected' : '' }}>Staff (Kasir & Dapur)</option>
-          <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>Admin / Owner (Akses Penuh)</option>
+          <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>Owner (Akses Penuh)</option>
         </select>
       </div>
 

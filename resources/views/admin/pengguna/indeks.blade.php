@@ -9,7 +9,7 @@
   <div style="padding: 20px 24px; border-bottom: 1px solid var(--border-light); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px;">
     <div>
       <h3 style="font-size: 16px; font-weight: 800; color: var(--text-dark);">Daftar Pengguna Sistem</h3>
-      <p style="font-size: 12.5px; color: var(--text-muted); margin: 0;">Kelola hak akses Admin Owner dan Staff Kasir/Dapur</p>
+      <p style="font-size: 12.5px; color: var(--text-muted); margin: 0;">Kelola hak akses Owner dan Staff Kasir/Dapur</p>
     </div>
 
     <div style="display: flex; gap: 10px;">
@@ -56,8 +56,8 @@
               <div style="font-size: 12px; color: var(--text-muted);">{{ $u->email }}</div>
             </td>
             <td>
-              @if($u->role === 'admin')
-                <span class="badge badge-orange">Admin Owner</span>
+              @if($u->role === 'admin' || $u->role === 'owner')
+                <span class="badge badge-orange">Owner</span>
               @else
                 <span class="badge badge-blue">Staff Kasir / Dapur</span>
               @endif

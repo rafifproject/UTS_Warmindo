@@ -39,7 +39,7 @@
 
         @auth
           @if(auth()->user()->isAdmin())
-            <a href="{{ route('admin.dashboard') }}" class="btn btn-sm btn-secondary">Dashboard Admin</a>
+            <a href="{{ route('admin.dashboard') }}" class="btn btn-sm btn-secondary">Dashboard Owner</a>
           @else
             <a href="{{ route('kasir.dashboard') }}" class="btn btn-sm btn-secondary">Kasir</a>
           @endif
